@@ -16,7 +16,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim as optim
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from retrain.LEAStereo import LEAStereo 
+from retrain.LEAStereo import LEAStereo
 
 from config_utils.predict_args import obtain_predict_args
 from utils.colorize import get_color_map
@@ -44,8 +44,8 @@ model = LEAStereo(opt)
 print('Total Params = %.2fMB' % count_parameters_in_MB(model))
 print('Feature Net Params = %.2fMB' % count_parameters_in_MB(model.feature))
 print('Matching Net Params = %.2fMB' % count_parameters_in_MB(model.matching))
-   
-mult_adds = comp_multadds(model, input_size=(3,opt.crop_height, opt.crop_width)) #(3,192, 192))
+
+mult_adds = comp_multadds(model, input_size=(3, opt.crop_height, opt.crop_width))  # (3,192, 192))
 print("compute_average_flops_cost = %.2fMB" % mult_adds)
 
 if cuda:
@@ -55,35 +55,39 @@ if opt.resume:
     if os.path.isfile(opt.resume):
         print("=> loading checkpoint '{}'".format(opt.resume))
         checkpoint = torch.load(opt.resume)
-        model.load_state_dict(checkpoint['state_dict'], strict=True)      
+        model.load_state_dict(checkpoint['state_dict'], strict=True)
     else:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
 turbo_colormap_data = get_color_map()
 
+
 def RGBToPyCmap(rgbdata):
     nsteps = rgbdata.shape[0]
     stepaxis = np.linspace(0, 1, nsteps)
 
-    rdata=[]; gdata=[]; bdata=[]
+    rdata = [];
+    gdata = [];
+    bdata = []
     for istep in range(nsteps):
-        r = rgbdata[istep,0]
-        g = rgbdata[istep,1]
-        b = rgbdata[istep,2]
+        r = rgbdata[istep, 0]
+        g = rgbdata[istep, 1]
+        b = rgbdata[istep, 2]
         rdata.append((stepaxis[istep], r, r))
         gdata.append((stepaxis[istep], g, g))
         bdata.append((stepaxis[istep], b, b))
 
-    mpl_data = {'red':   rdata,
-                 'green': gdata,
-                 'blue':  bdata}
+    mpl_data = {'red': rdata,
+                'green': gdata,
+                'blue': bdata}
 
     return mpl_data
 
-#mpl_data = RGBToPyCmap(turbo_colormap_data)
-#plt.register_cmap(name='turbo', data=mpl_data, lut=turbo_colormap_data.shape[0])
 
-def readPFM(file): 
+# mpl_data = RGBToPyCmap(turbo_colormap_data)
+# plt.register_cmap(name='turbo', data=mpl_data, lut=turbo_colormap_data.shape[0])
+
+def readPFM(file):
     with open(file, "rb") as f:
         # Line 1: PF=>RGB (3 channels), Pf=>Greyscale (1 channel)
         type = f.readline().decode('latin-1')
@@ -99,7 +103,7 @@ def readPFM(file):
         width = int(width)
         height = int(height)
 
-            # Line 3: +ve number means big endian, negative means little endian
+        # Line 3: +ve number means big endian, negative means little endian
         line = f.readline().decode('latin-1')
         BigEndian = True
         if "-" in line:
@@ -129,9 +133,9 @@ def save_pfm(filename, image, scale=1):
     if image.dtype.name != 'float32':
         raise Exception('Image dtype must be float32.')
 
-    if len(image.shape) == 3 and image.shape[2] == 3: # color image
+    if len(image.shape) == 3 and image.shape[2] == 3:  # color image
         color = True
-    elif len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1: # greyscale
+    elif len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1:  # greyscale
         color = False
     else:
         raise Exception('Image must have H x W x 3, H x W x 1 or H x W dimensions.')
@@ -150,8 +154,8 @@ def save_pfm(filename, image, scale=1):
 
 
 def test_transform(temp_data, crop_height, crop_width):
-    _, h, w=np.shape(temp_data)
-
+    _, h, w = np.shape(temp_data)
+    '''
     if h <= crop_height and w <= crop_width: 
         # padding zero 
         temp = temp_data
@@ -161,7 +165,15 @@ def test_transform(temp_data, crop_height, crop_width):
         start_x = int((w - crop_width) / 2)
         start_y = int((h - crop_height) / 2)
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
-    left = np.ones([1, 3,crop_height,crop_width],'float32')
+    '''
+
+    bound_h = max(h, crop_height)
+    bound_w = max(w, crop_width)
+    bound_frame = np.zeros([6, bound_h, bound_w], 'float32')
+    bound_frame[:, 0: h, 0: w] = temp_data
+    temp_data = bound_frame[:, 0: crop_height, 0: crop_width]
+
+    left = np.ones([1, 3, crop_height, crop_width], 'float32')
     left[0, :, :, :] = temp_data[0: 3, :, :]
     right = np.ones([1, 3, crop_height, crop_width], 'float32')
     right[0, :, :, :] = temp_data[3: 6, :, :]
@@ -185,8 +197,8 @@ def load_data(leftname, rightname):
     temp_data[2, :, :] = (b - np.mean(b[:])) / np.std(b[:])
     r = right[:, :, 0]
     g = right[:, :, 1]
-    b = right[:, :, 2]	
-    #r,g,b,_ = right.split()
+    b = right[:, :, 2]
+    # r,g,b,_ = right.split()
     temp_data[3, :, :] = (r - np.mean(r[:])) / np.std(r[:])
     temp_data[4, :, :] = (g - np.mean(g[:])) / np.std(g[:])
     temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
@@ -196,8 +208,8 @@ def load_data(leftname, rightname):
 def test_md(leftname, rightname, savename, imgname):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
-    input1 = Variable(input1, requires_grad = False)
-    input2 = Variable(input2, requires_grad = False)
+    input1 = Variable(input1, requires_grad=False)
+    input2 = Variable(input2, requires_grad=False)
 
     model.eval()
     if cuda:
@@ -209,7 +221,7 @@ def test_md(leftname, rightname, savename, imgname):
         prediction = model(input1, input2)
     torch.cuda.synchronize()
     end_time = time()
-    
+
     print("Processing time: {:.4f}".format(end_time - start_time))
     temp = prediction.cpu()
     temp = temp.detach().numpy()
@@ -218,32 +230,32 @@ def test_md(leftname, rightname, savename, imgname):
     else:
         temp = temp[0, :, :]
     plot_disparity(imgname, temp, 192)
-    savepfm_path = savename.replace('.png','') 
+    savepfm_path = savename.replace('.png', '')
     temp = np.flipud(temp)
 
     disppath = Path(savepfm_path)
     disppath.makedirs_p()
-    save_pfm(savepfm_path+'/disp0LEAStereo.pfm', temp, scale=1)
+    save_pfm(savepfm_path + '/disp0LEAStereo.pfm', temp, scale=1)
     ##########write time txt########
-    fp = open(savepfm_path+'/timeLEAStereo.txt', 'w')
-    runtime = "XXs"  
-    fp.write(runtime)   
+    fp = open(savepfm_path + '/timeLEAStereo.txt', 'w')
+    runtime = "XXs"
+    fp.write(runtime)
     fp.close()
 
 
 def test_kitti(leftname, rightname, savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
- 
-    input1 = Variable(input1, requires_grad = False)
-    input2 = Variable(input2, requires_grad = False)
+
+    input1 = Variable(input1, requires_grad=False)
+    input2 = Variable(input2, requires_grad=False)
 
     model.eval()
     if cuda:
         input1 = input1.cuda()
         input2 = input2.cuda()
-    with torch.no_grad():        
+    with torch.no_grad():
         prediction = model(input1, input2)
-        
+
     temp = prediction.cpu()
     temp = temp.detach().numpy()
     if height <= opt.crop_height and width <= opt.crop_width:
@@ -284,11 +296,11 @@ def test_satellite(leftname, rightname, savename):
     # temp = np.flipud(temp)
 
 
-def test(leftname, rightname, savename):  
+def test(leftname, rightname, savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
-    input1 = Variable(input1, requires_grad = False)
-    input2 = Variable(input2, requires_grad = False)
+    input1 = Variable(input1, requires_grad=False)
+    input2 = Variable(input2, requires_grad=False)
 
     model.eval()
     if cuda:
@@ -299,7 +311,7 @@ def test(leftname, rightname, savename):
     with torch.no_grad():
         prediction = model(input1, input2)
     end_time = time()
-    
+
     print("Processing time: {:.4f}".format(end_time - start_time))
     temp = prediction.cpu()
     temp = temp.detach().numpy()
@@ -308,13 +320,14 @@ def test(leftname, rightname, savename):
     else:
         temp = temp[0, :, :]
     plot_disparity(savename, temp, 192)
-    savename_pfm = savename.replace('png','pfm') 
+    savename_pfm = savename.replace('png', 'pfm')
     temp = np.flipud(temp)
+
 
 def plot_disparity(savename, data, max_disp):
     plt.imsave(savename, data, vmin=0, vmax=max_disp, cmap='turbo')
 
-   
+
 if __name__ == "__main__":
     file_path = opt.data_path
     file_list = opt.test_list
@@ -343,7 +356,10 @@ if __name__ == "__main__":
 
         if opt.sceneflow:
             leftname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
-            rightname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 14] + 'right/' + current_file[len(current_file) - 9:len(current_file) - 1]
+            rightname = file_path + 'frames_finalpass/' + current_file[
+                                                          0: len(current_file) - 14] + 'right/' + current_file[
+                                                                                                  len(current_file) - 9:len(
+                                                                                                      current_file) - 1]
             leftgtname = file_path + 'disparity/' + current_file[0: len(current_file) - 4] + 'pfm'
             disp_left_gt, height, width = readPFM(leftgtname)
             savenamegt = opt.save_path + "{:d}_gt.png".format(index)
@@ -354,12 +370,11 @@ if __name__ == "__main__":
 
         if opt.middlebury:
             leftname = file_path + current_file[0: len(current_file) - 1]
-            rightname = leftname.replace('im0','im1') 
+            rightname = leftname.replace('im0', 'im1')
 
-            temppath = opt.save_path.replace(opt.save_path.split("/")[-2], opt.save_path.split("/")[-2]+"/images")     
+            temppath = opt.save_path.replace(opt.save_path.split("/")[-2], opt.save_path.split("/")[-2] + "/images")
             img_path = Path(temppath)
             img_path.makedirs_p()
             savename = opt.save_path + current_file[0: len(current_file) - 9] + ".png"
             img_name = img_path + current_file[0: len(current_file) - 9] + ".png"
             test_md(leftname, rightname, savename, img_name)
-
