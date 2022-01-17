@@ -276,12 +276,9 @@ def test_satellite(leftname, rightname, savename):
         input1 = input1.cuda()
         input2 = input2.cuda()
 
-    start_time = time()
     with torch.no_grad():
         prediction = model(input1, input2)
-    end_time = time()
 
-    print("Processing time: {:.4f}".format(end_time - start_time))
     temp = prediction.cpu()
     temp = temp.detach().numpy()
     if height <= opt.crop_height or width <= opt.crop_width:
@@ -339,7 +336,7 @@ if __name__ == "__main__":
         if opt.satellite:
             leftname = file_path + current_file[:-1] + '/L_rgb.png'
             rightname = file_path + current_file[:-1] + '/R_rgb.png'
-            savename = opt.save_path + current_file[:-1]
+            savename = opt.save_path + current_file[:-1] + '_predict.png'
             test_satellite(leftname, rightname, savename)
 
         if opt.kitti2015:
