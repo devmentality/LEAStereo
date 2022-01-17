@@ -12,6 +12,7 @@ def obtain_predict_args():
     parser.add_argument('--kitti2012', type=int, default=0, help='kitti 2012? Default=False')
     parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
     parser.add_argument('--middlebury', type=int, default=0, help='Middlebury? Default=False')
+    parser.add_argument('--satellite', type=int, default=0, help='Satellite? Default=False')
     parser.add_argument('--data_path', type=str, required=True, help="data root")
     parser.add_argument('--test_list', type=str, required=True, help="training list")
     parser.add_argument('--save_path', type=str, default='./result/', help="location to save result")

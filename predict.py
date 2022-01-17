@@ -119,6 +119,7 @@ def readPFM(file):
 
     return img, height, width
 
+
 def save_pfm(filename, image, scale=1):
     '''
     Save a Numpy array to a PFM file.
@@ -147,6 +148,7 @@ def save_pfm(filename, image, scale=1):
 
     image.tofile(file)
 
+
 def test_transform(temp_data, crop_height, crop_width):
     _, h, w=np.shape(temp_data)
 
@@ -164,6 +166,7 @@ def test_transform(temp_data, crop_height, crop_width):
     right = np.ones([1, 3, crop_height, crop_width], 'float32')
     right[0, :, :, :] = temp_data[3: 6, :, :]
     return torch.from_numpy(left).float(), torch.from_numpy(right).float(), h, w
+
 
 def load_data(leftname, rightname):
     left = Image.open(leftname)
@@ -189,8 +192,8 @@ def load_data(leftname, rightname):
     temp_data[5, :, :] = (b - np.mean(b[:])) / np.std(b[:])
     return temp_data
 
-def test_md(leftname, rightname, savename, imgname):
 
+def test_md(leftname, rightname, savename, imgname):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
     input1 = Variable(input1, requires_grad = False)
@@ -227,6 +230,7 @@ def test_md(leftname, rightname, savename, imgname):
     fp.write(runtime)   
     fp.close()
 
+
 def test_kitti(leftname, rightname, savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
  
@@ -247,6 +251,37 @@ def test_kitti(leftname, rightname, savename):
     else:
         temp = temp[0, :, :]
     skimage.io.imsave(savename, (temp * 256).astype('uint16'))
+
+
+def test_satellite(leftname, rightname, savename):
+    input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
+
+    input1 = Variable(input1, requires_grad=False)
+    input2 = Variable(input2, requires_grad=False)
+
+    model.eval()
+    if cuda:
+        input1 = input1.cuda()
+        input2 = input2.cuda()
+
+    start_time = time()
+    with torch.no_grad():
+        prediction = model(input1, input2)
+    end_time = time()
+
+    print("Processing time: {:.4f}".format(end_time - start_time))
+    temp = prediction.cpu()
+    temp = temp.detach().numpy()
+    if height <= opt.crop_height or width <= opt.crop_width:
+        temp = temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
+    else:
+        temp = temp[0, :, :]
+
+    skimage.io.imsave(savename, (temp * 256).astype('uint16'))
+
+    # plot_disparity(savename, temp, 192)
+    # savename_pfm = savename.replace('png', 'pfm')
+    # temp = np.flipud(temp)
 
 
 def test(leftname, rightname, savename):  
@@ -287,6 +322,13 @@ if __name__ == "__main__":
     filelist = f.readlines()
     for index in range(len(filelist)):
         current_file = filelist[index]
+
+        if opt.satellite:
+            leftname = file_path + current_file[:-1] + '/L_rgb.png'
+            rightname = file_path + current_file[:-1] + '/R_rgb.png'
+            savename = opt.save_path + current_file[:-1]
+            test_satellite(leftname, rightname, savename)
+
         if opt.kitti2015:
             leftname = file_path + 'image_2/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'image_3/' + current_file[0: len(current_file) - 1]
