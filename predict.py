@@ -155,7 +155,7 @@ def save_pfm(filename, image, scale=1):
 
 def test_transform(temp_data, crop_height, crop_width):
     _, h, w = np.shape(temp_data)
-    '''
+
     if h <= crop_height and w <= crop_width: 
         # padding zero 
         temp = temp_data
@@ -165,13 +165,12 @@ def test_transform(temp_data, crop_height, crop_width):
         start_x = int((w - crop_width) / 2)
         start_y = int((h - crop_height) / 2)
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
-    '''
 
-    bound_h = max(h, crop_height)
-    bound_w = max(w, crop_width)
-    bound_frame = np.zeros([6, bound_h, bound_w], 'float32')
-    bound_frame[:, 0: h, 0: w] = temp_data
-    temp_data = bound_frame[:, 0: crop_height, 0: crop_width]
+    # bound_h = max(h, crop_height)
+    # bound_w = max(w, crop_width)
+    # bound_frame = np.zeros([6, bound_h, bound_w], 'float32')
+    # bound_frame[:, 0: h, 0: w] = temp_data
+    # temp_data = bound_frame[:, 0: crop_height, 0: crop_width]
 
     left = np.ones([1, 3, crop_height, crop_width], 'float32')
     left[0, :, :, :] = temp_data[0: 3, :, :]
