@@ -115,11 +115,13 @@ def train(epoch):
     print("===> Epoch {} Complete: Avg. Loss: ({:.4f}), Avg. Error: ({:.4f})".format(epoch, epoch_loss / valid_iteration, epoch_error/valid_iteration))
 
 def val():
+    print('Validation')
     epoch_error = 0
     valid_iteration = 0
     three_px_acc_all = 0
     model.eval()
     for iteration, batch in enumerate(testing_data_loader):
+        print(f'Validation iteration # {iteration}')
         input1, input2, target = Variable(batch[0],requires_grad=False), Variable(batch[1], requires_grad=False), Variable(batch[2], requires_grad=False)
         if cuda:
             input1 = input1.cuda()
@@ -129,6 +131,7 @@ def val():
         mask = target < opt.maxdisp
         mask.detach_()
         valid=target[mask].size()[0]
+        print(f'Valid count = {valid}')
         if valid>0:
             with torch.no_grad(): 
                 disp = model(input1,input2)
