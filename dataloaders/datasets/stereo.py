@@ -282,6 +282,9 @@ class DatasetFromList(data.Dataset):
             temp_data = load_data_sceneflow(Path.db_root_dir('sceneflow'), self.file_list[index])  
         elif self.args.dataset == 'middlebury': #load middbury dataset
             temp_data = load_data_md(Path.db_root_dir('middlebury'), self.file_list[index])
+        elif self.args.dataset == 'sceneflow_part':
+            temp_data = load_data_sceneflow(Path.db_root_dir('sceneflow_part'), self.file_list[index])
+
 
         if self.training:
             input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)

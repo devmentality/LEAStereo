@@ -10,6 +10,9 @@ def make_data_loader(args, **kwargs):
             
             train_list = 'dataloaders/lists/sf_part_train.list' 
             test_list  = 'dataloaders/lists/sf_part_test.list'  
+            
+            train_set  = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
+            test_set   = stereo.DatasetFromList(args, test_list,  [576,960], False)
 
             train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, **kwargs)
             test_loader = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
