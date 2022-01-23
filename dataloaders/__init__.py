@@ -3,8 +3,21 @@ from dataloaders.datasets import stereo
 import pdb
 
 def make_data_loader(args, **kwargs):
+        ####### custom sceneflow part ##########
+        if args.dataset == 'sceneflow_part':
+            if args.stage != 'train':
+                raise Exception('Stages other than train are not supported')
+            
+            train_list = 'dataloaders/lists/sf_part_train.list' 
+            test_list  = 'dataloaders/lists/sf_part_test.list'  
+
+            train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, **kwargs)
+            test_loader = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
+            
+            return train_loader, test_loader
+        
         ############################ sceneflow ###########################
-        if args.dataset == 'sceneflow':              
+        elif args.dataset == 'sceneflow':              
             trainA_list= 'dataloaders/lists/sceneflow_search_trainA.list' #randomly select 10,000 from the original training set
             trainB_list= 'dataloaders/lists/sceneflow_search_trainB.list' #randomly select 10,000 from the original training set
             val_list   = 'dataloaders/lists/sceneflow_search_val.list'   #randomly select 1,000 from the original test set
