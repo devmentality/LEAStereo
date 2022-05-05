@@ -73,6 +73,7 @@ class Cell(nn.Module):
         concat_feature = torch.cat(states[-self.block_multiplier:], dim=1) 
         return prev_input, concat_feature
 
+
 class newMatching(nn.Module):
     def __init__(self, network_arch, cell_arch, cell=Cell, args=None):        
         super(newMatching, self).__init__()

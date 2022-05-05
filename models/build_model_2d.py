@@ -6,6 +6,7 @@ from models.operations_2d import *
 from models.decoding_formulas import Decoder
 import pdb
 
+
 class DispEntropy(nn.Module):
     def __init__(self, maxdisp):
         super(DispEntropy, self).__init__()
@@ -13,6 +14,8 @@ class DispEntropy(nn.Module):
         self.maxdisp = maxdisp
 
     def forward(self, x):
+        print("FUUUU")
+
         x = F.interpolate(x, [self.maxdisp, x.size()[3]*3, x.size()[4]*3], mode='trilinear', align_corners=False)
         x = torch.squeeze(x, 1)
         e = torch.sum(-F.softmax(x,dim=1) * F.log_softmax(x,dim=1),1)
@@ -21,18 +24,22 @@ class DispEntropy(nn.Module):
         x = self.softmax(x)
         return x
 
+
 class DisparityRegression(nn.Module):
     def __init__(self, maxdisp):
         super(DisparityRegression, self).__init__()
         self.maxdisp = maxdisp
 
     def forward(self, x):
+        print("FUUUU")
+
         assert(x.is_contiguous() == True)
         with torch.cuda.device_of(x):
             disp = torch.reshape(torch.arange(0, self.maxdisp, device=torch.cuda.current_device(), dtype=torch.float32),[1,self.maxdisp,1,1])
             disp = disp.repeat(x.size()[0], 1, x.size()[2], x.size()[3])
             out = torch.sum(x * disp, 1)
         return out
+
 
 class Disp(nn.Module):
     def __init__(self, maxdisp=192):

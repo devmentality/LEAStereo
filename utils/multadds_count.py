@@ -9,14 +9,15 @@ def count_parameters_in_MB(model):
     return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "aux" not in name)/1e6
 
 
-def comp_multadds(model, input_size=(3,224,224), half=False):
+def comp_multadds(model, input_size=(3, 224, 224), half=False):
     input_size = (1,) + tuple(input_size)
-    model = model.cuda()
-    input_data = torch.randn(input_size).cuda()
+    model = model.cpu()
+    input_data = torch.randn(input_size).cpu()
     model = add_flops_counting_methods(model)
     if half:
         input_data = input_data.half()
     model.start_flops_count()
+
     with torch.no_grad():
         _ = model(input_data, input_data)
 

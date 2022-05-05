@@ -54,8 +54,13 @@ if cuda:
 if opt.resume:
     if os.path.isfile(opt.resume):
         print("=> loading checkpoint '{}'".format(opt.resume))
-        checkpoint = torch.load(opt.resume)
-        model.load_state_dict(checkpoint['state_dict'], strict=True)
+        checkpoint = torch.load(opt.resume, map_location=torch.device('cpu'))
+        state_dict = dict()
+        for key in checkpoint['state_dict'].keys():
+            unwrapped_key = key.split('.', 1)[1] if key.startswith('module') else key
+            state_dict[unwrapped_key] = checkpoint['state_dict'][key]
+
+        model.load_state_dict(state_dict, strict=True)
     else:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
@@ -306,6 +311,7 @@ def test(leftname, rightname, savename):
     start_time = time()
     with torch.no_grad():
         prediction = model(input1, input2)
+
     end_time = time()
 
     print("Processing time: {:.4f}".format(end_time - start_time))
@@ -325,6 +331,7 @@ def plot_disparity(savename, data, max_disp):
 
 
 if __name__ == "__main__":
+    print('Running')
     file_path = opt.data_path
     file_list = opt.test_list
     f = open(file_list, 'r')
@@ -351,6 +358,7 @@ if __name__ == "__main__":
             test_kitti(leftname, rightname, savename)
 
         if opt.sceneflow:
+            print(f'Running for sceneflow {index}')
             leftname = file_path + 'frames_finalpass/' + current_file[0: len(current_file) - 1]
             rightname = file_path + 'frames_finalpass/' + current_file[
                                                           0: len(current_file) - 14] + 'right/' + current_file[
@@ -360,7 +368,6 @@ if __name__ == "__main__":
             disp_left_gt, height, width = readPFM(leftgtname)
             savenamegt = opt.save_path + "{:d}_gt.png".format(index)
             plot_disparity(savenamegt, disp_left_gt, 192)
-
             savename = opt.save_path + "{:d}.png".format(index)
             test(leftname, rightname, savename)
 
