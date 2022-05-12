@@ -132,10 +132,10 @@ class newFeature(nn.Module):
 
             self.cells += [_cell]
 
-        self.last_3  = ConvBR(initial_fm , initial_fm, 1, 1, 0, bn=False, relu=False) 
-        self.last_6  = ConvBR(initial_fm*2 , initial_fm,    1, 1, 0)  
-        self.last_12 = ConvBR(initial_fm*4 , initial_fm*2,  1, 1, 0)  
-        self.last_24 = ConvBR(initial_fm*8 , initial_fm*4,  1, 1, 0)  
+        self.last_3 = ConvBR(initial_fm, initial_fm, 1, 1, 0, bn=False, relu=False)
+        self.last_6 = ConvBR(initial_fm*2, initial_fm,    1, 1, 0)
+        self.last_12 = ConvBR(initial_fm*4, initial_fm*2,  1, 1, 0)
+        self.last_24 = ConvBR(initial_fm*8, initial_fm*4,  1, 1, 0)
 
     def forward(self, x):
         stem0 = self.stem0(x)

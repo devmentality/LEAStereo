@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import models.cell_level_search_2d as cell_level_search
@@ -14,8 +15,6 @@ class DispEntropy(nn.Module):
         self.maxdisp = maxdisp
 
     def forward(self, x):
-        print("FUUUU")
-
         x = F.interpolate(x, [self.maxdisp, x.size()[3]*3, x.size()[4]*3], mode='trilinear', align_corners=False)
         x = torch.squeeze(x, 1)
         e = torch.sum(-F.softmax(x,dim=1) * F.log_softmax(x,dim=1),1)
@@ -31,11 +30,10 @@ class DisparityRegression(nn.Module):
         self.maxdisp = maxdisp
 
     def forward(self, x):
-        print("FUUUU")
-
         assert(x.is_contiguous() == True)
         with torch.cuda.device_of(x):
-            disp = torch.reshape(torch.arange(0, self.maxdisp, device=torch.cuda.current_device(), dtype=torch.float32),[1,self.maxdisp,1,1])
+            # !
+            disp = torch.reshape(torch.arange(0, self.maxdisp, device=torch.device('cpu'), dtype=torch.float32),[1,self.maxdisp,1,1])
             disp = disp.repeat(x.size()[0], 1, x.size()[2], x.size()[3])
             out = torch.sum(x * disp, 1)
         return out

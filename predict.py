@@ -365,6 +365,7 @@ if __name__ == "__main__":
                                                                                                   len(current_file) - 9:len(
                                                                                                       current_file) - 1]
             leftgtname = file_path + 'disparity/' + current_file[0: len(current_file) - 4] + 'pfm'
+            print(leftgtname)
             disp_left_gt, height, width = readPFM(leftgtname)
             savenamegt = opt.save_path + "{:d}_gt.png".format(index)
             plot_disparity(savenamegt, disp_left_gt, 192)

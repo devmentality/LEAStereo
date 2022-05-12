@@ -128,10 +128,10 @@ class newMatching(nn.Module):
 
             self.cells += [_cell]
 
-        self.last_3  = ConvBR(initial_fm, 1, 3, 1, 1,  bn=False, relu=False)  
-        self.last_6  = ConvBR(initial_fm*2 , initial_fm,    1, 1, 0)  
-        self.last_12 = ConvBR(initial_fm*4 , initial_fm*2,  1, 1, 0)  
-        self.last_24 = ConvBR(initial_fm*8 , initial_fm*4,  1, 1, 0)  
+        self.last_3 = ConvBR(initial_fm, 1, 3, 1, 1,  bn=False, relu=False)
+        self.last_6 = ConvBR(initial_fm*2, initial_fm,    1, 1, 0)
+        self.last_12 = ConvBR(initial_fm*4, initial_fm*2,  1, 1, 0)
+        self.last_24 = ConvBR(initial_fm*8, initial_fm*4,  1, 1, 0)
         
         self.conv1 = ConvBR(initial_fm*4, initial_fm*2, 3, 1, 1)
         self.conv2 = ConvBR(initial_fm*4, initial_fm*2, 3, 1, 1)
