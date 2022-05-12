@@ -153,12 +153,12 @@ class newMatching(nn.Module):
         out8 = self.cells[8](out7[0], out7[1])
         out8_cat = self.conv2(torch.cat((out4[-1], out8[-1]), 1))
         out9 = self.cells[9](out8[0], out8_cat)
-        out10= self.cells[10](out9[0], out9[1])
-        out11= self.cells[11](out10[0],out10[1])
+        out10 = self.cells[10](out9[0], out9[1])
+        out11 = self.cells[11](out10[0], out10[1])
         last_output = out11[-1]
 
         d, h, w = x.size()[2], x.size()[3], x.size()[4]
-        upsample_6  = nn.Upsample(size=x.size()[2:], mode='trilinear', align_corners=True)
+        upsample_6 = nn.Upsample(size=x.size()[2:], mode='trilinear', align_corners=True)
         upsample_12 = nn.Upsample(size=[d//2, h//2, w//2], mode='trilinear', align_corners=True)
         upsample_24 = nn.Upsample(size=[d//4, h//4, w//4], mode='trilinear', align_corners=True)
 

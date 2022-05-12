@@ -131,7 +131,6 @@ class newMatching(nn.Module):
         self.last_6  = ConvBR(initial_fm*2 , initial_fm,    1, 1, 0)  
         self.last_12 = ConvBR(initial_fm*4 , initial_fm*2,  1, 1, 0)  
         self.last_24 = ConvBR(initial_fm*8 , initial_fm*4,  1, 1, 0)  
-        
 
     def forward(self, x):
         stem0 = self.stem0(x)
@@ -144,7 +143,7 @@ class newMatching(nn.Module):
 
         #define upsampling
         d, h, w = x.size()[2], x.size()[3], x.size()[4]
-        upsample_6  = nn.Upsample(size=x.size()[2:], mode='trilinear', align_corners=True)
+        upsample_6 = nn.Upsample(size=x.size()[2:], mode='trilinear', align_corners=True)
         upsample_12 = nn.Upsample(size=[d//2, h//2, w//2], mode='trilinear', align_corners=True)
         upsample_24 = nn.Upsample(size=[d//4, h//4, w//4], mode='trilinear', align_corners=True)
 
@@ -156,5 +155,5 @@ class newMatching(nn.Module):
             mat = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(last_output)))))
         elif last_output.size()[3] == h//8:
             mat = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(upsample_24(self.last_24(last_output)))))))      
-        return mat  
 
+        return mat
