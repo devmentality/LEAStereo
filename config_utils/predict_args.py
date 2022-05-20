@@ -1,7 +1,7 @@
 import argparse
 
-def obtain_predict_args():
 
+def obtain_predict_args():
     parser = argparse.ArgumentParser(description='LEStereo Prediction')
     parser.add_argument('--crop_height', type=int, required=True, help="crop height")
     parser.add_argument('--crop_width', type=int, required=True, help="crop width")

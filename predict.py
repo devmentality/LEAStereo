@@ -1,21 +1,15 @@
 from __future__ import print_function
-import argparse
 import skimage
 import skimage.io
 import skimage.transform
 from PIL import Image
-from math import log10
 
 import sys
-import shutil
 import os
 import torch
-import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
-import torch.optim as optim
 from torch.autograd import Variable
-from torch.utils.data import DataLoader
 from retrain.LEAStereo import LEAStereo
 
 from config_utils.predict_args import obtain_predict_args
@@ -26,7 +20,6 @@ from struct import unpack
 import matplotlib.pyplot as plt
 import re
 import numpy as np
-import pdb
 from path import Path
 
 opt = obtain_predict_args()

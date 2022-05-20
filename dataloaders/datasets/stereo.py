@@ -91,6 +91,7 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
         target = temp_data[6: 7, :, :]
         return left, right, target    
 
+
 def test_transform(temp_data, crop_height, crop_width, left_right=False):
     _, h, w = np.shape(temp_data)
 
