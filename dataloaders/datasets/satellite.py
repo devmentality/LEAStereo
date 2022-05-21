@@ -1,6 +1,8 @@
 from PIL import Image
 import numpy as np
+import os.path
 from dataclasses import dataclass
+from common import set_rgb_layers
 
 
 def transform_to_disparity(pixel_data: np.ndarray):
@@ -30,6 +32,29 @@ def read_disparity_image(file_name: str) -> DisparityData:
     occlusions_map = np.apply_along_axis(transform_to_occlusion, 2, data)
 
     return DisparityData(disparity_map, occlusions_map)
+
+
+def load_data_satellite(data_path, current_file):
+    left_name = os.path.join(data_path, current_file, 'satiml.png')
+    right_name = os.path.join(data_path, current_file, 'satimr.png')
+    disp_left_name = os.path.join(data_path, current_file, 'disparityl.png')
+    disp_right_name = os.path.join(data_path, current_file, 'disparityr.png')
+
+    left = Image.open(left_name)
+    right = Image.open(right_name)
+    disp_left_data = read_disparity_image(disp_left_name)
+    disp_right_data = read_disparity_image(disp_right_name)
+
+    height, width = left.shape
+
+    temp_data = np.zeros([8, height, width], 'float32')
+
+    set_rgb_layers(temp_data, left, right)
+
+    temp_data[6, :, :] = disp_left_data.disparity_map
+    temp_data[7, :, :] = disp_right_data.disparity_map
+
+    return temp_data
 
 
 def test_reading():

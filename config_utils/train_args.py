@@ -1,7 +1,7 @@
 import argparse
 
-def obtain_train_args():
 
+def obtain_train_args():
     # Training settings
     parser = argparse.ArgumentParser(description='LEStereo training...')
     parser.add_argument('--maxdisp', type=int, default=192, 

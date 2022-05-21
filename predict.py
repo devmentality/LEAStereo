@@ -16,11 +16,10 @@ from config_utils.predict_args import obtain_predict_args
 from utils.colorize import get_color_map
 from utils.multadds_count import count_parameters_in_MB, comp_multadds
 from time import time
-from struct import unpack
 import matplotlib.pyplot as plt
-import re
 import numpy as np
 from path import Path
+from dataloaders.datasets.common import read_pfm
 
 opt = obtain_predict_args()
 print(opt)
@@ -84,42 +83,6 @@ def RGBToPyCmap(rgbdata):
 
 # mpl_data = RGBToPyCmap(turbo_colormap_data)
 # plt.register_cmap(name='turbo', data=mpl_data, lut=turbo_colormap_data.shape[0])
-
-def readPFM(file):
-    with open(file, "rb") as f:
-        # Line 1: PF=>RGB (3 channels), Pf=>Greyscale (1 channel)
-        type = f.readline().decode('latin-1')
-        if "PF" in type:
-            channels = 3
-        elif "Pf" in type:
-            channels = 1
-        else:
-            sys.exit(1)
-        # Line 2: width height
-        line = f.readline().decode('latin-1')
-        width, height = re.findall('\d+', line)
-        width = int(width)
-        height = int(height)
-
-        # Line 3: +ve number means big endian, negative means little endian
-        line = f.readline().decode('latin-1')
-        BigEndian = True
-        if "-" in line:
-            BigEndian = False
-        # Slurp all binary data
-        samples = width * height * channels;
-        buffer = f.read(samples * 4)
-        # Unpack floats with appropriate endianness
-        if BigEndian:
-            fmt = ">"
-        else:
-            fmt = "<"
-        fmt = fmt + str(samples) + "f"
-        img = unpack(fmt, buffer)
-        img = np.reshape(img, (height, width))
-        img = np.flipud(img)
-
-    return img, height, width
 
 
 def save_pfm(filename, image, scale=1):
@@ -359,7 +322,7 @@ if __name__ == "__main__":
                                                                                                       current_file) - 1]
             leftgtname = file_path + 'disparity/' + current_file[0: len(current_file) - 4] + 'pfm'
             print(leftgtname)
-            disp_left_gt, height, width = readPFM(leftgtname)
+            disp_left_gt, height, width = read_pfm(leftgtname)
             savenamegt = opt.save_path + "{:d}_gt.png".format(index)
             plot_disparity(savenamegt, disp_left_gt, 192)
             savename = opt.save_path + "{:d}.png".format(index)
