@@ -1,28 +1,20 @@
 from __future__ import print_function
-import argparse
-from math import log10
 
 import sys
 import shutil
 import os
 import torch
-import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.nn.functional as F
-import skimage
-import pdb
 import numpy as np
 from torch.autograd import Variable
-from torch.utils.data import DataLoader
 from time import time
-from collections import OrderedDict
 from retrain.LEAStereo import LEAStereo
 
-from mypath import Path
 from dataloaders import make_data_loader
-from utils.multadds_count import count_parameters_in_MB, comp_multadds, comp_multadds_fw
+from utils.multadds_count import count_parameters_in_MB
 from config_utils.train_args import obtain_train_args
 
 
@@ -78,6 +70,11 @@ if opt.resume:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
 
+def calculate_validity_mask(target):
+    # Zeros in target are occlusions
+    return (target < opt.maxdisp) & (target != 0)
+
+
 def train(epoch):
     epoch_loss = 0
     epoch_error = 0
@@ -91,8 +88,8 @@ def train(epoch):
             input2 = input2.cuda()
             target = target.cuda()
 
-        target = torch.squeeze(target,1)
-        mask = target < opt.maxdisp
+        target = torch.squeeze(target, 1)
+        mask = calculate_validity_mask(target)
         mask.detach_()
         valid = target[mask].size()[0]
         train_start_time = time()
@@ -100,7 +97,7 @@ def train(epoch):
             model.train()
     
             optimizer.zero_grad()
-            disp = model(input1,input2) 
+            disp = model(input1, input2)
             loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
             loss.backward()
             optimizer.step()
@@ -135,7 +132,7 @@ def val():
             target = target.cuda()
 
         target = torch.squeeze(target, 1)
-        mask = target < opt.maxdisp
+        mask = calculate_validity_mask(target)
         mask.detach_()
         valid = target[mask].size()[0]
         print(f'Valid count = {valid}')
@@ -165,7 +162,7 @@ def val():
     return three_px_acc_all/valid_iteration
 
 
-def save_checkpoint(save_path, epoch,state, is_best):
+def save_checkpoint(save_path, epoch, state, is_best):
     filename = save_path + "epoch_{}.pth".format(epoch)
     torch.save(state, filename)
     if is_best:
@@ -173,7 +170,7 @@ def save_checkpoint(save_path, epoch,state, is_best):
     print("Checkpoint saved to {}".format(filename))
 
 
-if __name__ == '__main__':
+def train_main():
     error = 100
     for epoch in range(1, opt.nEpochs + 1):
         train(epoch)
@@ -185,28 +182,32 @@ if __name__ == '__main__':
         if opt.dataset == 'sceneflow':
             if epoch >= 0:
                 save_checkpoint(opt.save_path, epoch, {
-                        'epoch': epoch,
-                        'state_dict': model.state_dict(),
-                        'optimizer' : optimizer.state_dict(),
-                    }, is_best)
+                    'epoch': epoch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                }, is_best)
         else:
             if epoch % 100 == 0 and epoch >= 3000:
                 save_checkpoint(opt.save_path, epoch, {
-                        'epoch': epoch,
-                        'state_dict': model.state_dict(),
-                        'optimizer' : optimizer.state_dict(),
-                    }, is_best)
+                    'epoch': epoch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                }, is_best)
             if is_best:
                 save_checkpoint(opt.save_path, epoch, {
-                        'epoch': epoch,
-                        'state_dict': model.state_dict(),
-                        'optimizer': optimizer.state_dict(),
-                    }, is_best)
+                    'epoch': epoch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                }, is_best)
 
         scheduler.step()
 
-    save_checkpoint(opt.save_path, opt.nEpochs,{
-            'epoch': opt.nEpochs,
-            'state_dict': model.state_dict(),
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+    save_checkpoint(opt.save_path, opt.nEpochs, {
+        'epoch': opt.nEpochs,
+        'state_dict': model.state_dict(),
+        'optimizer': optimizer.state_dict(),
+    }, is_best)
+
+
+if __name__ == '__main__':
+    train_main()

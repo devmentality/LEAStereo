@@ -11,6 +11,8 @@ class Path(object):
             return './dataset/MiddEval3/trainingH/'
         elif dataset == 'sceneflow_part':
             return './dataset/sceneflow_part/'
+        elif dataset == 'satellite':
+            return './dataset/l2d_ntagil_20220319/'
         else:
             print('Dataset {} not available.'.format(dataset))
             raise NotImplementedError

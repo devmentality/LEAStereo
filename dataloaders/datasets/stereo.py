@@ -122,14 +122,15 @@ def load_data_md(file_path, current_file, eth=False):
 class DatasetFromList(data.Dataset): 
     def __init__(self, args, file_list, crop_size=[256, 256], training=True, left_right=False, shift=0):
         super(DatasetFromList, self).__init__()
-        f = open(file_list, 'r')
         self.args = args
-        self.file_list = f.readlines()
         self.training = training
         self.crop_height = crop_size[0]
         self.crop_width = crop_size[1]
         self.left_right = left_right
         self.shift = shift
+
+        with open(file_list, 'r') as f:
+            self.file_list = f.readlines()
 
     def __getitem__(self, index):
         if self.args.dataset == 'kitti12':
@@ -147,10 +148,10 @@ class DatasetFromList(data.Dataset):
 
         if self.training:
             input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)
-            return input1, input2, target, mask
+            return input1, input2, target
         else:
             input1, input2, target = test_transform(temp_data, self.crop_height, self.crop_width)
-            return input1, input2, target, mask
+            return input1, input2, target
 
     def __len__(self):
         return len(self.file_list)
