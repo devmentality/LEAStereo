@@ -3,6 +3,21 @@ from dataloaders.datasets import stereo
 
 
 def make_data_loader(args, **kwargs):
+    if args.dataset == 'satellite':
+        if args.stage != 'train':
+            raise Exception('Stages other than train are not supported')
+
+        train_list = 'dataloaders/lists/satellite_train.list'
+        test_list = 'dataloaders/lists/satellite_test.list'
+
+        train_set = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
+        test_set = stereo.DatasetFromList(args, test_list, [args.crop_height, args.crop_width], False)
+
+        train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, **kwargs)
+        test_loader = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
+
+        return train_loader, test_loader
+
     ####### custom sceneflow part ##########
     if args.dataset == 'sceneflow_part':
         if args.stage != 'train':
@@ -21,16 +36,16 @@ def make_data_loader(args, **kwargs):
 
     ############################ sceneflow ###########################
     elif args.dataset == 'sceneflow':
-        trainA_list= 'dataloaders/lists/sceneflow_search_trainA.list' #randomly select 10,000 from the original training set
-        trainB_list= 'dataloaders/lists/sceneflow_search_trainB.list' #randomly select 10,000 from the original training set
-        val_list   = 'dataloaders/lists/sceneflow_search_val.list'   #randomly select 1,000 from the original test set
-        train_list = 'dataloaders/lists/sceneflow_train.list'  #original training set: 35,454
-        test_list  = 'dataloaders/lists/sceneflow_test.list'   #original test set:4,370
+        trainA_list = 'dataloaders/lists/sceneflow_search_trainA.list'  # randomly select 10,000 from the original training set
+        trainB_list = 'dataloaders/lists/sceneflow_search_trainB.list'  # randomly select 10,000 from the original training set
+        val_list = 'dataloaders/lists/sceneflow_search_val.list'  # randomly select 1,000 from the original test set
+        train_list = 'dataloaders/lists/sceneflow_train.list'  # original training set: 35,454
+        test_list = 'dataloaders/lists/sceneflow_test.list'  # original test set:4,370
         trainA_set = stereo.DatasetFromList(args, trainA_list, [args.crop_height, args.crop_width], True)
         trainB_set = stereo.DatasetFromList(args, trainB_list, [args.crop_height, args.crop_width], True)
-        train_set  = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
-        val_set    = stereo.DatasetFromList(args, val_list,  [576,960], False)
-        test_set   = stereo.DatasetFromList(args, test_list,  [576,960], False)
+        train_set = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
+        val_set = stereo.DatasetFromList(args, val_list,  [576,960], False)
+        test_set = stereo.DatasetFromList(args, test_list,  [576,960], False)
 
         if args.stage == 'search':
             train_loaderA = DataLoader(trainA_set, batch_size=args.batch_size, shuffle=True, **kwargs)
@@ -61,10 +76,10 @@ def make_data_loader(args, **kwargs):
 
     ############################ kitti12 ###########################
     elif args.dataset == 'kitti12':
-        train_list= 'dataloaders/lists/kitti2012_train170.list'
+        train_list = 'dataloaders/lists/kitti2012_train170.list'
         test_list = 'dataloaders/lists/kitti2012_val24.list'
         train_set = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
-        test_set  = stereo.DatasetFromList(args, test_list,  [384,1248], False)
+        test_set = stereo.DatasetFromList(args, test_list,  [384, 1248], False)
 
         train_loader= DataLoader(train_set, batch_size=args.batch_size, shuffle=True, **kwargs)
         test_loader = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
@@ -72,13 +87,13 @@ def make_data_loader(args, **kwargs):
 
     ############################ middlebury ###########################
     elif args.dataset == 'middlebury':
-        train_list= 'dataloaders/lists/middeval3_train.list'
+        train_list = 'dataloaders/lists/middeval3_train.list'
         test_list = 'dataloaders/lists/middeval3_train.list'
         train_set = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
-        test_set  = stereo.DatasetFromList(args, test_list,  [1008,1512], False)
+        test_set = stereo.DatasetFromList(args, test_list,  [1008, 1512], False)
 
         train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, **kwargs)
-        test_loader  = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
+        test_loader = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
         return train_loader, test_loader
     else:
         raise NotImplementedError

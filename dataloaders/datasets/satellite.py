@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 import os.path
-from common import set_rgb_layers
+from .common import set_rgb_layers
 
 
 def transform_to_disparity(pixel_data: np.ndarray):

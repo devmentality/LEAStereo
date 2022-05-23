@@ -11,5 +11,7 @@ CUDA_VISIBLE_DEVICES=0 python3 train.py --batch_size=4 \
                 --cell_arch_fea='run/sceneflow/best/architecture/feature_genotype.npy' \
                 --net_arch_mat='run/sceneflow/best/architecture/matching_network_path.npy' \
                 --cell_arch_mat='run/sceneflow/best/architecture/matching_genotype.npy' \
-                --nEpochs=20
+                --nEpochs=20 \
+                --dataset=satellite
+
 

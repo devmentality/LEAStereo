@@ -3,8 +3,8 @@ from PIL import Image
 import numpy as np
 from mypath import Path
 import pdb
-from common import read_pfm, set_rgb_layers, train_transform, test_transform
-from satellite import load_data_satellite
+from .common import read_pfm, set_rgb_layers, train_transform, test_transform
+from .satellite import load_data_satellite
 
 
 def load_data_sceneflow(data_path, current_file):
@@ -67,7 +67,7 @@ def load_kitti2012_data(file_path, current_file):
     left = Image.open(filename)
     filename = file_path+'colored_1/' + current_file[0: len(current_file) - 1]
     right = Image.open(filename)
-    filename = file_path+'disp_noc/' + current_file[0: len(current_file) - 1] #disp_occ
+    filename = file_path+'disp_noc/' + current_file[0: len(current_file) - 1]  # disp_occ
 
     disp_left = Image.open(filename)
     temp = np.asarray(disp_left)
