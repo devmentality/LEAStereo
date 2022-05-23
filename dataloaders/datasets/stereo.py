@@ -144,7 +144,8 @@ class DatasetFromList(data.Dataset):
         elif self.args.dataset == 'sceneflow_part':
             temp_data = load_data_sceneflow(Path.db_root_dir('sceneflow_part'), self.file_list[index])
         elif self.args.dataset == 'satellite':
-            temp_data = load_data_satellite(Path.db_root_dir('satellite'), self.file_list[index])
+            curr_file = self.file_list[index][:-1]
+            temp_data = load_data_satellite(Path.db_root_dir('satellite'), curr_file)
 
         if self.training:
             input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)
