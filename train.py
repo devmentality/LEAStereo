@@ -26,6 +26,11 @@ cuda = opt.cuda
 if cuda and not torch.cuda.is_available():
     raise Exception("No GPU found, please run without --cuda")
 
+device = 'cpu'
+
+if cuda:
+    device = torch.cuda.current_device()
+
 torch.manual_seed(opt.seed)
 if cuda:
     torch.cuda.manual_seed(opt.seed)

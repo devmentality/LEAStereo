@@ -58,12 +58,17 @@ class Trainer(object):
         self.summary = TensorboardSummary(self.saver.experiment_dir)
         self.writer = self.summary.create_summary()
 
-        kwargs = {'num_workers': args.workers, 'pin_memory': True, 'drop_last':True}
+        kwargs = {'num_workers': args.workers, 'pin_memory': True, 'drop_last': True}
 
         self.train_loaderA, self.train_loaderB, self.val_loader, self.test_loader = make_data_loader(args, **kwargs)
 
+        device = 'cpu'
+        if cuda:
+            device = torch.cuda.current_device()
+
         # Define network
-        model = AutoStereo(maxdisp = self.args.max_disp, 
+        model = AutoStereo(device=device,
+                           maxdisp=self.args.max_disp,
                            Fea_Layers=self.args.fea_num_layers, Fea_Filter=self.args.fea_filter_multiplier, 
                            Fea_Block=self.args.fea_block_multiplier, Fea_Step=self.args.fea_step, 
                            Mat_Layers=self.args.mat_num_layers, Mat_Filter=self.args.mat_filter_multiplier, 
@@ -123,13 +128,12 @@ class Trainer(object):
                 copy_state_dict(self.model.state_dict(), new_state_dict)
 
             else:
-                if torch.cuda.device_count() > 1:#or args.load_parallel:
+                if torch.cuda.device_count() > 1:  # or args.load_parallel:
                     # self.model.module.load_state_dict(checkpoint['state_dict'])
                     copy_state_dict(self.model.module.state_dict(), checkpoint['state_dict'])
                 else:
                     # self.model.load_state_dict(checkpoint['state_dict'])
                     copy_state_dict(self.model.module.state_dict(), checkpoint['state_dict'])
-
 
             if not args.ft:
                 # self.optimizer.load_state_dict(checkpoint['optimizer'])
@@ -146,7 +150,6 @@ class Trainer(object):
         print('Total number of model parameters : {}'.format(sum([p.data.nelement() for p in self.model.parameters()])))
         print('Number of Feature Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.module.feature.parameters()])))
         print('Number of Matching Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.module.matching.parameters()])))
-
 
     def training(self, epoch):
         train_loss = 0.0
@@ -275,7 +278,6 @@ class Trainer(object):
         self.writer.add_scalar('val/D1_all', three_px_acc_all/valid_iteration, epoch)
 
         print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error/valid_iteration, three_px_acc_all/valid_iteration))
-
 
         # save model
         new_pred = epoch_error/valid_iteration # three_px_acc_all/valid_iteration

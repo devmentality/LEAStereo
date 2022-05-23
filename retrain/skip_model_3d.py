@@ -8,6 +8,7 @@ import torch.nn.functional as F
 import numpy as np
 import pdb
 
+
 class Cell(nn.Module):
     def __init__(self, steps, block_multiplier, prev_prev_fmultiplier,
                  prev_filter_multiplier, cell_arch, network_arch,
@@ -171,4 +172,3 @@ class newMatching(nn.Module):
         elif last_output.size()[3] == h//8:
             mat = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(upsample_24(self.last_24(last_output)))))))      
         return mat  
-

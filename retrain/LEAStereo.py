@@ -10,7 +10,7 @@ from retrain.skip_model_3d import newMatching
 
 
 class LEAStereo(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, device):
         super(LEAStereo, self).__init__()
 
         network_path_fea, cell_arch_fea = np.load(args.net_arch_fea), np.load(args.cell_arch_fea)
@@ -23,14 +23,21 @@ class LEAStereo(nn.Module):
         self.maxdisp = args.maxdisp
         self.feature = newFeature(network_arch_fea, cell_arch_fea, args=args)
         self.matching = newMatching(network_arch_mat, cell_arch_mat, args=args)
-        self.disp = Disp(self.maxdisp)
+        self.disp = Disp(device, self.maxdisp)
+        self.cuda = args.cuda
+        self.device = device
 
     def forward(self, x, y):
         x = self.feature(x)       
         y = self.feature(y) 
 
-        #with torch.cuda.device_of(x):
-        cost = x.new().resize_(x.size()[0], x.size()[1]*2, int(self.maxdisp/3),  x.size()[2],  x.size()[3]).zero_()
+        if self.cuda:
+            with torch.cuda.device_of(x):
+                cost = x.new().resize_(x.size()[0], x.size()[1]*2, int(self.maxdisp/3),  x.size()[2],
+                                       x.size()[3]).zero_()
+        else:
+            cost = x.new().resize_(x.size()[0], x.size()[1] * 2, int(self.maxdisp / 3), x.size()[2],
+                                   x.size()[3]).zero_()
 
         for i in range(int(self.maxdisp/3)):
             if i > 0:

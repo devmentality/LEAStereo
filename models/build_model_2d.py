@@ -25,26 +25,29 @@ class DispEntropy(nn.Module):
 
 
 class DisparityRegression(nn.Module):
-    def __init__(self, maxdisp):
+    def __init__(self, maxdisp, device):
         super(DisparityRegression, self).__init__()
         self.maxdisp = maxdisp
+        self.device = device
 
     def forward(self, x):
-        assert(x.is_contiguous() == True)
+        assert(x.is_contiguous() is True)
         with torch.cuda.device_of(x):
-            # !
-            disp = torch.reshape(torch.arange(0, self.maxdisp, device=torch.device('cpu'), dtype=torch.float32),[1,self.maxdisp,1,1])
+            disp = torch.reshape(
+                torch.arange(0, self.maxdisp, device=torch.device(self.device), dtype=torch.float32),
+                [1, self.maxdisp, 1, 1])
+
             disp = disp.repeat(x.size()[0], 1, x.size()[2], x.size()[3])
             out = torch.sum(x * disp, 1)
         return out
 
 
 class Disp(nn.Module):
-    def __init__(self, maxdisp=192):
+    def __init__(self, device, maxdisp=192):
         super(Disp, self).__init__()
         self.maxdisp = maxdisp
         self.softmax = nn.Softmin(dim=1)
-        self.disparity = DisparityRegression(maxdisp=self.maxdisp)
+        self.disparity = DisparityRegression(maxdisp=self.maxdisp, device=device)
 
     def forward(self, x):
         x = F.interpolate(x, [self.maxdisp, x.size()[3]*3, x.size()[4]*3], mode='trilinear', align_corners=False)
