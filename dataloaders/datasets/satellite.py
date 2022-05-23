@@ -25,12 +25,14 @@ def load_data_satellite(data_path, current_file):
     disp_left_name = os.path.join(data_path, current_file, 'disparityl.png')
     disp_right_name = os.path.join(data_path, current_file, 'disparityr.png')
 
-    left = Image.open(left_name)
-    right = Image.open(right_name)
+    left = np.asarray(Image.open(left_name))
+    right = np.asarray(Image.open(right_name))
     disp_left = read_disparity_image(disp_left_name)
     disp_right = read_disparity_image(disp_right_name)
 
-    height, width = left.shape
+    height, width, _ = left.shape
+
+    print(f'Loaded sample from {current_file}, size {height} x {width}')
 
     temp_data = np.zeros([8, height, width], 'float32')
 
