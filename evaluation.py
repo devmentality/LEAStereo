@@ -14,23 +14,10 @@ from struct import unpack
 from torch.autograd import Variable
 from utils.multadds_count import count_parameters_in_MB, comp_multadds
 from retrain.LEAStereo import LEAStereo
+from config_utils.evaluation_args import obtain_evaluation_args
 
 
-parser = argparse.ArgumentParser(description='PyTorch GANet Example')
-parser.add_argument('--crop_height', type=int, required=True, help="crop height")
-parser.add_argument('--crop_width', type=int, required=True, help="crop width")
-parser.add_argument('--max_disp', type=int, default=192, help="max disp")
-parser.add_argument('--resume', type=str, default='', help="resume from saved model")
-parser.add_argument('--cuda', type=bool, default=True, help='use cuda?')
-parser.add_argument('--kitti', type=int, default=0, help='kitti dataset? Default=False')
-parser.add_argument('--kitti2015', type=int, default=0, help='kitti 2015? Default=False')
-parser.add_argument('--data_path', type=str, required=True, help="data root")
-parser.add_argument('--test_list', type=str, required=True, help="training list")
-parser.add_argument('--save_path', type=str, default='./result/', help="location to save result")
-parser.add_argument('--threshold', type=float, default=3.0, help="threshold of error rates")
-parser.add_argument('--multi_gpu', type=int, default=0, help="multi_gpu choice")
-
-opt = parser.parse_args()
+opt = obtain_evaluation_args()
 
 print(opt)
 
