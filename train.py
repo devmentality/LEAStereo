@@ -16,7 +16,7 @@ from retrain.LEAStereo import LEAStereo
 from dataloaders import make_data_loader
 from utils.multadds_count import count_parameters_in_MB
 from config_utils.train_args import obtain_train_args
-
+from torch.utils.tensorboard import SummaryWriter
 
 opt = obtain_train_args()
 print(opt)
@@ -74,6 +74,15 @@ if opt.resume:
     else:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
+os.makedirs('./logs', exist_ok=True)
+
+experiment_name = f'{opt.dataset}'
+tb_dir = f'./logs/{experiment_name}'
+tb_writer = SummaryWriter(tb_dir)
+
+val_step = 0
+train_step = 0
+
 
 def calculate_validity_mask(target):
     # Zeros in target are occlusions
@@ -115,7 +124,12 @@ def train(epoch):
             valid_iteration += 1
             epoch_error += error.item()
             print("===> Epoch[{}]({}/{}): Loss: ({:.4f}), Error: ({:.4f}), Time: ({:.2f}s)".format(epoch, iteration, len(training_data_loader), loss.item(), error.item(), train_time))
-            sys.stdout.flush()                        
+            sys.stdout.flush()
+
+            tb_writer.add_scalar('Train loss', loss.item(), train_step + 1)
+            tb_writer.add_scalar('Train error', error.item(), train_step + 1)
+            train_step += 1
+
     print("===> Epoch {} Complete: Avg. Loss: ({:.4f}), Avg. Error: ({:.4f})".format(epoch, epoch_loss / valid_iteration, epoch_error/valid_iteration))
 
 
@@ -162,6 +176,10 @@ def val():
     
                 print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_acc))
                 sys.stdout.flush()
+
+                tb_writer.add_scalar('Validation error', error.item(), val_step + 1)
+                tb_writer.add_scalar('Valication 3px accuracy', three_px_acc, val_step + 1)
+                val_step += 1
 
     print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error/valid_iteration, three_px_acc_all/valid_iteration))
     return three_px_acc_all/valid_iteration
