@@ -134,6 +134,7 @@ def train(epoch):
 
 
 def val():
+    global val_step
     print('Validation')
     epoch_error = 0
     valid_iteration = 0
@@ -194,6 +195,7 @@ def save_checkpoint(save_path, epoch, state, is_best):
 
 
 def train_main():
+    global train_step
     error = 100
     for epoch in range(1, opt.nEpochs + 1):
         train(epoch)
