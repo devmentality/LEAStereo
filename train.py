@@ -90,6 +90,7 @@ def calculate_validity_mask(target):
 
 
 def train(epoch):
+    global train_step
     epoch_loss = 0
     epoch_error = 0
     valid_iteration = 0
@@ -195,7 +196,6 @@ def save_checkpoint(save_path, epoch, state, is_best):
 
 
 def train_main():
-    global train_step
     error = 100
     for epoch in range(1, opt.nEpochs + 1):
         train(epoch)
