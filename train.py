@@ -40,7 +40,7 @@ kwargs = {'num_workers': opt.threads, 'pin_memory': True, 'drop_last':True}
 training_data_loader, testing_data_loader = make_data_loader(opt, **kwargs)
 
 print('===> Building model')
-model = LEAStereo(opt)
+model = LEAStereo(opt, device)
 
 # compute parameters
 # print('Total number of model parameters : {}'.format(sum([p.data.nelement() for p in model.parameters()])))
