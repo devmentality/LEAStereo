@@ -1,0 +1,1 @@
+sbatch -p debug --mem=32000 --gres=gpu:k40m:3 --cpus-per-task=5 -t 00:15:00 --job-name=student --output='test_%j' --wrap="sh ./train_satellite.sh"
