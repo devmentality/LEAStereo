@@ -29,7 +29,7 @@ if cuda and not torch.cuda.is_available():
 device = 'cpu'
 
 if cuda:
-    device = torch.cuda.current_device()
+    device = 'cuda'
 
 torch.manual_seed(opt.seed)
 if cuda:
