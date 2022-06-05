@@ -27,11 +27,17 @@ print(opt)
 torch.backends.cudnn.benchmark = True
 
 cuda = opt.cuda
+
+device = 'cpu'
+
+if cuda:
+    device = 'cuda'
+
 if cuda and not torch.cuda.is_available():
     raise Exception("No GPU found, please run without --cuda")
 
 print('===> Building LEAStereo model')
-model = LEAStereo(opt)
+model = LEAStereo(opt, device)
 
 print('Total Params = %.2fMB' % count_parameters_in_MB(model))
 print('Feature Net Params = %.2fMB' % count_parameters_in_MB(model.feature))
@@ -46,11 +52,15 @@ if cuda:
 if opt.resume:
     if os.path.isfile(opt.resume):
         print("=> loading checkpoint '{}'".format(opt.resume))
-        checkpoint = torch.load(opt.resume, map_location=torch.device('cpu'))
-        state_dict = dict()
-        for key in checkpoint['state_dict'].keys():
-            unwrapped_key = key.split('.', 1)[1] if key.startswith('module') else key
-            state_dict[unwrapped_key] = checkpoint['state_dict'][key]
+        checkpoint = torch.load(opt.resume, map_location=torch.device(device))
+
+        if device == 'cpu':
+            state_dict = dict()
+            for key in checkpoint['state_dict'].keys():
+                unwrapped_key = key.split('.', 1)[1] if key.startswith('module') else key
+                state_dict[unwrapped_key] = checkpoint['state_dict'][key]
+        else:
+            state_dict = checkpoint['state_dict']
 
         model.load_state_dict(state_dict, strict=True)
     else:
@@ -63,8 +73,8 @@ def RGBToPyCmap(rgbdata):
     nsteps = rgbdata.shape[0]
     stepaxis = np.linspace(0, 1, nsteps)
 
-    rdata = [];
-    gdata = [];
+    rdata = []
+    gdata = []
     bdata = []
     for istep in range(nsteps):
         r = rgbdata[istep, 0]
