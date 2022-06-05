@@ -298,9 +298,9 @@ if __name__ == "__main__":
         current_file = filelist[index]
 
         if opt.satellite:
-            leftname = file_path + current_file[:-1] + '/L_rgb.png'
-            rightname = file_path + current_file[:-1] + '/R_rgb.png'
-            savename = opt.save_path + current_file[:-1] + '_predict.png'
+            leftname = file_path + current_file[:-1] + '/satiml.png'
+            rightname = file_path + current_file[:-1] + '/satimr.png'
+            savename = opt.save_path + current_file[:-1] + '.png'
             test_satellite(leftname, rightname, savename)
 
         if opt.kitti2015:
