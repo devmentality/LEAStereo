@@ -330,3 +330,10 @@ if __name__ == "__main__":
             savename = opt.save_path + current_file[0: len(current_file) - 9] + ".png"
             img_name = img_path + current_file[0: len(current_file) - 9] + ".png"
             test_md(leftname, rightname, savename, img_name)
+
+        if opt.mvs3d:
+            print(f"Running for mvs3d {current_file}")
+            leftname = file_path + current_file[:-1] + '_LEFT_RGB.tif'
+            rightname = file_path + current_file[:-1] + '_RIGHT_RGB.tif'
+            savename = opt.save_path + current_file[:-1] + '.png'
+            test_satellite(leftname, rightname, savename)
