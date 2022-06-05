@@ -24,14 +24,14 @@ class LEAStereo(nn.Module):
         self.feature = newFeature(network_arch_fea, cell_arch_fea, args=args)
         self.matching = newMatching(network_arch_mat, cell_arch_mat, args=args)
         self.disp = Disp(device, self.maxdisp)
-        self.cuda = args.cuda
+        self.use_cuda = args.cuda
         self.device = device
 
     def forward(self, x, y):
         x = self.feature(x)       
         y = self.feature(y) 
 
-        if self.cuda:
+        if self.use_cuda:
             with torch.cuda.device_of(x):
                 cost = x.new().resize_(x.size()[0], x.size()[1]*2, int(self.maxdisp/3),  x.size()[2],
                                        x.size()[3]).zero_()
