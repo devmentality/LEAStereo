@@ -15,6 +15,7 @@ from retrain.LEAStereo import LEAStereo
 
 from dataloaders import make_data_loader
 from utils.multadds_count import count_parameters_in_MB
+from utils.early_stopping import EarlyStopping
 from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
 
@@ -139,7 +140,7 @@ def val():
     print('Validation')
     epoch_error = 0
     valid_iteration = 0
-    three_px_acc_all = 0
+    three_px_error_all = 0
     model.eval()
     for iteration, batch in enumerate(testing_data_loader):
         print(f'Validation iteration # {iteration}')
@@ -160,31 +161,46 @@ def val():
 
         if valid > 0:
             with torch.no_grad(): 
-                disp = model(input1,input2)
+                disp = model(input1, input2)
                 error = torch.mean(torch.abs(disp[mask] - target[mask])) 
 
                 valid_iteration += 1
                 epoch_error += error.item()              
-                # computing 3-px error
-                pred_disp = disp.cpu().detach() 
-                true_disp = target.cpu().detach()
-                disp_true = true_disp
-                index = np.argwhere(true_disp < opt.maxdisp)
-                disp_true[index[0][:], index[1][:], index[2][:]] = np.abs(true_disp[index[0][:], index[1][:], index[2][:]]-pred_disp[index[0][:], index[1][:], index[2][:]])
-                correct = (disp_true[index[0][:], index[1][:], index[2][:]] < 1)|(disp_true[index[0][:], index[1][:], index[2][:]] < true_disp[index[0][:], index[1][:], index[2][:]]*0.05)      
-                three_px_acc = 1-(float(torch.sum(correct))/float(len(index[0])))
 
-                three_px_acc_all += three_px_acc
+                # computing 3-px error (diff < 3px or < 5%)
+                predicted_disparity = disp.cpu().detach()
+                true_disparity = target.cpu().detach()
+                abs_diff = np.abs(true_disparity - predicted_disparity)
+                correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
+                three_px_error = 1 - (float(torch.sum(correct)) / float(len(mask)))
+                three_px_error_all += three_px_error
     
-                print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_acc))
+                print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_error))
                 sys.stdout.flush()
 
                 tb_writer.add_scalar('Validation error', error.item(), val_step + 1)
-                tb_writer.add_scalar('Valication 3px accuracy', three_px_acc, val_step + 1)
+                tb_writer.add_scalar('Validation 3px error', three_px_error, val_step + 1)
                 val_step += 1
 
-    print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error/valid_iteration, three_px_acc_all/valid_iteration))
-    return three_px_acc_all/valid_iteration
+    avg_three_px_error = three_px_error_all / valid_iteration
+    print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error / valid_iteration, avg_three_px_error))
+    return avg_three_px_error
+
+
+def train_with_early_stop():
+    early_stop = EarlyStopping(opt.save_path, patience=5, delta=0.001)
+    epoch = 1
+
+    while not early_stop.early_stop:
+        train(epoch)
+        loss = val()
+        state = {
+            'epoch': epoch,
+            'state_dict': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+        }
+        early_stop(loss, state, epoch)
+        scheduler.step()
 
 
 def save_checkpoint(save_path, epoch, state, is_best):
@@ -195,7 +211,7 @@ def save_checkpoint(save_path, epoch, state, is_best):
     print("Checkpoint saved to {}".format(filename))
 
 
-def train_main():
+def train_n_epochs():
     error = 100
     for epoch in range(1, opt.nEpochs + 1):
         train(epoch)
@@ -235,4 +251,4 @@ def train_main():
 
 
 if __name__ == '__main__':
-    train_main()
+    train_with_early_stop()

@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES="0,1" python3 train.py --batch_size=2 \
+CUDA_VISIBLE_DEVICES="0,1,2" python3 train.py --batch_size=3 \
                 --crop_height=384 \
                 --crop_width=576 \
                 --maxdisp=192 \
@@ -11,7 +11,6 @@ CUDA_VISIBLE_DEVICES="0,1" python3 train.py --batch_size=2 \
                 --cell_arch_fea='run/sceneflow/best/architecture/feature_genotype.npy' \
                 --net_arch_mat='run/sceneflow/best/architecture/matching_network_path.npy' \
                 --cell_arch_mat='run/sceneflow/best/architecture/matching_genotype.npy' \
-                --nEpochs=20 \
                 --dataset=satellite
 
 
