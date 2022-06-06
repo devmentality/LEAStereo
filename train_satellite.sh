@@ -12,5 +12,6 @@ CUDA_VISIBLE_DEVICES="0,1,2" python3 train.py --batch_size=3 \
                 --net_arch_mat='run/sceneflow/best/architecture/matching_network_path.npy' \
                 --cell_arch_mat='run/sceneflow/best/architecture/matching_genotype.npy' \
                 --dataset=satellite
+                --resume='./run/sceneflow/best/checkpoint/best.pth'
 
 
