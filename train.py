@@ -87,7 +87,7 @@ train_step = 0
 
 def calculate_validity_mask(target):
     # Zeros in target are occlusions
-    return (target < opt.maxdisp) & (target != 0)
+    return (target < opt.maxdisp) & (target > 0.001)
 
 
 def train(epoch):
@@ -170,9 +170,12 @@ def val():
                 # computing 3-px error (diff < 3px or < 5%)
                 predicted_disparity = disp.cpu().detach()
                 true_disparity = target.cpu().detach()
-                abs_diff = np.abs(true_disparity - predicted_disparity)
+                shape = true_disparity.shape
+
+                abs_diff = np.full(shape, 10000)
+                abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
                 correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
-                three_px_error = 1 - (float(torch.sum(correct)) / float(len(mask)))
+                three_px_error = 1 - (float(torch.sum(correct)) / float(len(np.argwhere(mask))))
                 three_px_error_all += three_px_error
     
                 print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_error))
