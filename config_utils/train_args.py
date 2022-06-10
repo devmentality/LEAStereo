@@ -14,7 +14,7 @@ def obtain_train_args():
                         help="resume from saved model")
     parser.add_argument('--batch_size', type=int, default=1, 
                         help='training batch size')
-    parser.add_argument('--testBatchSize', type=int, default=8, 
+    parser.add_argument('--testBatchSize', type=int, default=1,
                         help='testing batch size')
     parser.add_argument('--nEpochs', type=int, default=2048, 
                         help='number of epochs to train for')
