@@ -36,7 +36,7 @@ def obtain_train_args():
                         help='epochs at which learning rate is divided by 2')    
     parser.add_argument('--stage', type=str, default='train', choices=['search', 'train'])
     parser.add_argument('--dataset', type=str, default='sceneflow', 
-                        choices=['sceneflow', 'kitti15', 'kitti12', 'middlebury', 'sceneflow_part', 'satellite'],
+                        choices=['sceneflow', 'kitti15', 'kitti12', 'middlebury', 'sceneflow_part', 'satellite', 'dfc2019'],
                         help='dataset name')
 
     ######### LEStereo params ##################

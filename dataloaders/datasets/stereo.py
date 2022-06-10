@@ -119,6 +119,33 @@ def load_data_md(file_path, current_file, eth=False):
     return temp_data
 
 
+def load_data_dfc2019(data_path, current_file):
+    leftname = data_path + current_file + '_LEFT_RGB.tif'
+    rightname = data_path + current_file + '_RIGHT_RGB.tif'
+    _, sample_name = current_file.rsplit('/', maxsplit=1)
+    dispname = data_path + 'Track2-Truth/' + sample_name + '_LEFT_DSP.tif'
+
+    left = np.asarray(Image.open(leftname))
+    right = np.asarray(Image.open(rightname))
+    disp_left = np.asarray(Image.open(dispname))
+
+    size = np.shape(left)
+
+    height = size[0]
+    width = size[1]
+    temp_data = np.zeros([8, height, width], 'float32')
+
+    set_rgb_layers(temp_data, left, right)
+
+    temp_data[6: 7, :, :] = width * 2
+    temp_data[6, :, :] = disp_left[:, :]
+    temp = temp_data[6, :, :]
+    temp[temp < 0.1] = width * 2
+    temp_data[6, :, :] = temp
+
+    return temp_data
+
+
 class DatasetFromList(data.Dataset): 
     def __init__(self, args, file_list, crop_size=[256, 256], training=True, left_right=False, shift=0):
         super(DatasetFromList, self).__init__()
@@ -146,6 +173,9 @@ class DatasetFromList(data.Dataset):
         elif self.args.dataset == 'satellite':
             curr_file = self.file_list[index][:-1]
             temp_data = load_data_satellite(Path.db_root_dir('satellite'), curr_file)
+        elif self.args.dataset == 'dfc2019':
+            curr_file = self.file_list[index][:-1]
+            temp_data = load_data_dfc2019(Path.db_root_dir('dfc2019'), curr_file)
 
         if self.training:
             input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)

@@ -13,6 +13,8 @@ class Path(object):
             return './dataset/sceneflow_part/'
         elif dataset == 'satellite':
             return './dataset/l2d_ntagil_20220319/'
+        elif dataset == 'dfc2019':
+            return './dataset/dfc2019/'
         else:
             print('Dataset {} not available.'.format(dataset))
             raise NotImplementedError
