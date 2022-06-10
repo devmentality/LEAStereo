@@ -168,7 +168,7 @@ def val():
                 epoch_error += error.item()              
 
                 # computing 3-px error (diff < 3px or < 5%)
-                predicted_disparity = disp.cpu().detach()
+                predicted_disparity = disp.cpu().detach().numpy()
                 true_disparity = target.cpu().detach().numpy()
                 shape = true_disparity.shape
                 mask = mask.cpu().detach()
