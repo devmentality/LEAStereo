@@ -171,7 +171,7 @@ def val():
                 predicted_disparity = disp.cpu().detach()
                 true_disparity = target.cpu().detach()
                 shape = true_disparity.shape
-
+                mask = mask.cpu().detach()
                 abs_diff = np.full(shape, 10000)
                 abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
                 correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
