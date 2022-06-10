@@ -18,6 +18,21 @@ def make_data_loader(args, **kwargs):
 
         return train_loader, test_loader
 
+    if args.dataset == 'dfc2019':
+        if args.stage != 'train':
+            raise Exception('Stages other than train are not supported')
+
+        train_list = 'dataloaders/lists/dfc2019_train.list'
+        test_list = 'dataloaders/lists/dfc2019_test.list'
+
+        train_set = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
+        test_set = stereo.DatasetFromList(args, test_list, [args.crop_height, args.crop_width], False)
+
+        train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, **kwargs)
+        test_loader = DataLoader(test_set, batch_size=args.testBatchSize, shuffle=False, **kwargs)
+
+        return train_loader, test_loader
+
     ####### custom sceneflow part ##########
     if args.dataset == 'sceneflow_part':
         if args.stage != 'train':
