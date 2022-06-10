@@ -175,6 +175,10 @@ def val():
                 abs_diff = np.full(shape, 10000)
                 abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
                 correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
+                print(np.sum(correct))
+
+                print(len(np.argwhere(mask)))
+
                 three_px_error = 1 - (float(np.sum(correct)) / float(len(np.argwhere(mask))))
                 three_px_error_all += three_px_error
     
