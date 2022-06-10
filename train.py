@@ -169,7 +169,7 @@ def val():
 
                 # computing 3-px error (diff < 3px or < 5%)
                 predicted_disparity = disp.cpu().detach()
-                true_disparity = target.cpu().detach()
+                true_disparity = target.cpu().detach().numpy()
                 shape = true_disparity.shape
                 mask = mask.cpu().detach()
                 abs_diff = np.full(shape, 10000)
