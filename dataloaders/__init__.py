@@ -22,8 +22,8 @@ def make_data_loader(args, **kwargs):
         if args.stage != 'train':
             raise Exception('Stages other than train are not supported')
 
-        train_list = 'dataloaders/lists/dfc2019_train.list'
-        test_list = 'dataloaders/lists/dfc2019_test.list'
+        train_list = 'dataloaders/lists/dfc2_train.list'
+        test_list = 'dataloaders/lists/dfc2_test.list'
 
         train_set = stereo.DatasetFromList(args, train_list, [args.crop_height, args.crop_width], True)
         test_set = stereo.DatasetFromList(args, test_list, [args.crop_height, args.crop_width], False)
