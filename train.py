@@ -24,6 +24,10 @@ opt = obtain_train_args()
 print(opt)
 print(f"Running experiment {opt.experiment}")
 
+# Prepare dir
+run_dir = f"{opt.dataset}/{opt.experiment}/"
+os.makedirs(opt.save_path + run_dir, exist_ok=True)
+
 cuda = opt.cuda
 
 if cuda and not torch.cuda.is_available():
@@ -212,7 +216,7 @@ def train_with_early_stop():
 
 
 def save_checkpoint(save_path, epoch, state, is_best):
-    filename = save_path + f"{opt.experiment}_epoch_{epoch}.pth"
+    filename = save_path + f"epoch_{epoch}.pth"
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, save_path + 'best.pth')
