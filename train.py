@@ -135,13 +135,15 @@ def train(epoch):
             sys.stdout.flush()
 
             tb_writer.add_scalar('Train loss', loss.item(), train_step + 1)
-            tb_writer.add_scalar('Train error', error.item(), train_step + 1)
+            tb_writer.add_scalar('Train EPE', error.item(), train_step + 1)
             train_step += 1
+
+    tb_writer.add_scalar('Train Epoch EPE', epoch_error/valid_iteration, epoch)
 
     print("===> Epoch {} Complete: Avg. Loss: ({:.4f}), Avg. Error: ({:.4f})".format(epoch, epoch_loss / valid_iteration, epoch_error/valid_iteration))
 
 
-def val():
+def val(epoch):
     global val_step
     print('Validation')
     epoch_error = 0
@@ -191,12 +193,16 @@ def val():
                 print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_error))
                 sys.stdout.flush()
 
-                tb_writer.add_scalar('Validation error', error.item(), val_step + 1)
+                tb_writer.add_scalar('Validation EPE', error.item(), val_step + 1)
                 tb_writer.add_scalar('Validation 3px error', three_px_error, val_step + 1)
                 val_step += 1
 
     avg_three_px_error = three_px_error_all / valid_iteration
-    print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error / valid_iteration, avg_three_px_error))
+    avg_epe = epoch_error / valid_iteration
+    tb_writer.add_scalar('Validation Epoch EPE', avg_epe, epoch)
+    tb_writer.add_scalar('Validation Epoch 3px error', avg_three_px_error, epoch)
+
+    print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(avg_epe, avg_three_px_error))
     return avg_three_px_error
 
 
@@ -206,7 +212,7 @@ def train_with_early_stop():
 
     while not early_stop.early_stop:
         train(epoch)
-        loss = val()
+        loss = val(epoch)
         state = {
             'epoch': epoch,
             'state_dict': model.state_dict(),
@@ -214,6 +220,7 @@ def train_with_early_stop():
         }
         early_stop(loss, state, epoch)
         scheduler.step()
+        epoch += 1
 
 
 def save_checkpoint(save_path, epoch, state, is_best):
@@ -229,7 +236,7 @@ def train_n_epochs():
     for epoch in range(1, opt.nEpochs + 1):
         train(epoch)
         is_best = False
-        loss = val()
+        loss = val(epoch)
         if loss < error:
             error = loss
             is_best = True
