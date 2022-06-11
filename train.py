@@ -19,8 +19,10 @@ from utils.early_stopping import EarlyStopping
 from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
 
+
 opt = obtain_train_args()
 print(opt)
+print(f"Running experiment {opt.experiment}")
 
 cuda = opt.cuda
 

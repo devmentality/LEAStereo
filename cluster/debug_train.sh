@@ -1,0 +1,1 @@
+srun --pty -p debug --mem=32000 --gres=gpu:k40m:3 sh ./train_satellite.sh
