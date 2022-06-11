@@ -27,6 +27,7 @@ print(f"Running experiment {opt.experiment}")
 # Prepare dir
 run_dir = f"{opt.dataset}/{opt.experiment}/"
 os.makedirs(opt.save_path + run_dir, exist_ok=True)
+opt.save_path = opt.save_path + run_dir
 
 cuda = opt.cuda
 
