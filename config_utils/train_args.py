@@ -38,6 +38,7 @@ def obtain_train_args():
     parser.add_argument('--dataset', type=str, default='sceneflow', 
                         choices=['sceneflow', 'kitti15', 'kitti12', 'middlebury', 'sceneflow_part', 'satellite', 'dfc2019'],
                         help='dataset name')
+    parser.add_argument('--experiment', type=str, default='default', help='Experiment name')
 
     ######### LEStereo params ##################
     parser.add_argument('--fea_num_layers', type=int, default=6)

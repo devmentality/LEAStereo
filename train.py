@@ -77,8 +77,7 @@ if opt.resume:
 
 os.makedirs('./logs', exist_ok=True)
 
-experiment_name = f'{opt.dataset}'
-tb_dir = f'./logs/{experiment_name}'
+tb_dir = f'./logs/{opt.experiment}'
 tb_writer = SummaryWriter(tb_dir)
 
 val_step = 0
@@ -211,7 +210,7 @@ def train_with_early_stop():
 
 
 def save_checkpoint(save_path, epoch, state, is_best):
-    filename = save_path + "epoch_{}.pth".format(epoch)
+    filename = save_path + f"{opt.experiment}_epoch_{epoch}.pth"
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, save_path + 'best.pth')
