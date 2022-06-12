@@ -207,7 +207,7 @@ def val(epoch):
 
 
 def train_with_early_stop():
-    early_stop = EarlyStopping(opt.save_path, patience=5, delta=0.001)
+    early_stop = EarlyStopping(opt.save_path, patience=20, delta=0.001)
     epoch = 1
 
     while not early_stop.early_stop:
