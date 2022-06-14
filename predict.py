@@ -124,6 +124,21 @@ def save_pfm(filename, image, scale=1):
     image.tofile(file)
 
 
+def crop_image(image, crop_height, crop_width):
+    data = np.asarray(image)
+    n_layers, h, w = np.shape(data)
+
+    if h <= crop_height and w <= crop_width:
+        result = np.zeros([n_layers, crop_height, crop_width], 'float32')
+        result[:, crop_height - h: crop_height, crop_width - w: crop_width] = data
+    else:
+        start_x = (w - crop_width) // 2
+        start_y = (h - crop_height) // 2
+        result = data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
+
+    return result
+
+
 def test_transform(temp_data, crop_height, crop_width):
     _, h, w = np.shape(temp_data)
 
@@ -167,44 +182,6 @@ def load_data(leftname, rightname):
     return temp_data
 
 
-def test_md(leftname, rightname, savename, imgname):
-    input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
-
-    input1 = Variable(input1, requires_grad=False)
-    input2 = Variable(input2, requires_grad=False)
-
-    model.eval()
-    if cuda:
-        input1 = input1.cuda()
-        input2 = input2.cuda()
-    torch.cuda.synchronize()
-    start_time = time()
-    with torch.no_grad():
-        prediction = model(input1, input2)
-    torch.cuda.synchronize()
-    end_time = time()
-
-    print("Processing time: {:.4f}".format(end_time - start_time))
-    temp = prediction.cpu()
-    temp = temp.detach().numpy()
-    if height <= opt.crop_height or width <= opt.crop_width:
-        temp = temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
-    else:
-        temp = temp[0, :, :]
-    plot_disparity(imgname, temp, 192)
-    savepfm_path = savename.replace('.png', '')
-    temp = np.flipud(temp)
-
-    disppath = Path(savepfm_path)
-    disppath.makedirs_p()
-    save_pfm(savepfm_path + '/disp0LEAStereo.pfm', temp, scale=1)
-    ##########write time txt########
-    fp = open(savepfm_path + '/timeLEAStereo.txt', 'w')
-    runtime = "XXs"
-    fp.write(runtime)
-    fp.close()
-
-
 def test_kitti(leftname, rightname, savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
@@ -227,7 +204,7 @@ def test_kitti(leftname, rightname, savename):
     skimage.io.imsave(savename, (temp * 256).astype('uint16'))
 
 
-def test_satellite(leftname, rightname, savename):
+def test_satellite(leftname, rightname, savename, in_savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
     input1 = Variable(input1, requires_grad=False)
@@ -248,11 +225,12 @@ def test_satellite(leftname, rightname, savename):
     else:
         temp = temp[0, :, :]
 
-    skimage.io.imsave(savename, (temp * 256).astype('uint16'))
+#    skimage.io.imsave(savename, (temp * 256).astype('uint16'))
+    skimage.io.imsave(savename, temp)
 
-    # plot_disparity(savename, temp, 192)
-    # savename_pfm = savename.replace('png', 'pfm')
-    # temp = np.flipud(temp)
+    left = Image.open(leftname)
+    left = crop_image(left, opt.crop_height, opt.crop_width)
+    skimage.io.imsave(in_savename, left)
 
 
 def test(leftname, rightname, savename):
@@ -298,10 +276,12 @@ if __name__ == "__main__":
         current_file = filelist[index]
 
         if opt.satellite:
-            leftname = file_path + current_file[:-1] + '/satiml.png'
-            rightname = file_path + current_file[:-1] + '/satimr.png'
-            savename = opt.save_path + current_file[:-1] + '.png'
-            test_satellite(leftname, rightname, savename)
+            current_file = current_file[:-1]
+            leftname = file_path + current_file + '/satiml.png'
+            rightname = file_path + current_file + '/satimr.png'
+            savename = opt.save_path + current_file + '.png'
+            in_savename = opt.save_path + current_file + '_in.png'
+            test_satellite(leftname, rightname, savename, in_savename)
 
         if opt.kitti2015:
             leftname = file_path + 'image_2/' + current_file[0: len(current_file) - 1]
