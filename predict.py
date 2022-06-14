@@ -137,6 +137,7 @@ def crop_image(image, crop_height, crop_width):
         start_y = (h - crop_height) // 2
         result = data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
 
+    result = np.moveaxis(result, [0], [2])
     return result
 
 
