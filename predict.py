@@ -126,6 +126,7 @@ def save_pfm(filename, image, scale=1):
 
 def crop_image(image, crop_height, crop_width):
     data = np.asarray(image)
+    data = np.moveaxis(data, [2], [0])
     n_layers, h, w = np.shape(data)
 
     if h <= crop_height and w <= crop_width:
