@@ -12,6 +12,7 @@ CUDA_VISIBLE_DEVICES=0 python3 predict.py \
                 --cell_arch_fea='run/sceneflow/best/architecture/feature_genotype.npy' \
                 --net_arch_mat='run/sceneflow/best/architecture/matching_network_path.npy' \
                 --cell_arch_mat='run/sceneflow/best/architecture/matching_genotype.npy' \
-                --resume='./run/satellite/retrain/best.pth'
+                --resume='./run/satellite/retrain/best.pth' \
+                --satellite=1
 
 
