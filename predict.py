@@ -311,21 +311,3 @@ if __name__ == "__main__":
             plot_disparity(savenamegt, disp_left_gt, 192)
             savename = opt.save_path + "{:d}.png".format(index)
             test(leftname, rightname, savename)
-
-        if opt.middlebury:
-            leftname = file_path + current_file[0: len(current_file) - 1]
-            rightname = leftname.replace('im0', 'im1')
-
-            temppath = opt.save_path.replace(opt.save_path.split("/")[-2], opt.save_path.split("/")[-2] + "/images")
-            img_path = Path(temppath)
-            img_path.makedirs_p()
-            savename = opt.save_path + current_file[0: len(current_file) - 9] + ".png"
-            img_name = img_path + current_file[0: len(current_file) - 9] + ".png"
-            test_md(leftname, rightname, savename, img_name)
-
-        if opt.mvs3d:
-            print(f"Running for mvs3d {current_file}")
-            leftname = file_path + current_file[:-1] + '_LEFT_RGB.tif'
-            rightname = file_path + current_file[:-1] + '_RIGHT_RGB.tif'
-            savename = opt.save_path + current_file[:-1] + '.png'
-            test_satellite(leftname, rightname, savename)
