@@ -1,4 +1,4 @@
-EXPERIMENT=""
+EXPERIMENT=$1
 
 CUDA_VISIBLE_DEVICES=0 python3 evaluation.py \
                 --crop_height=384 \
