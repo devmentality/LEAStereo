@@ -81,8 +81,11 @@ def crop_array(data, crop_height, crop_width):
 
 def predict(left, right):
     _, height, width = np.shape(left)
-    input1 = crop_array(left, opt.crop_height, opt.crop_width)
-    input2 = crop_array(right, opt.crop_height, opt.crop_width)
+    input1 = np.ones([1, 3, opt.crop_height, opt.crop_width], 'float32')
+    input1[0, :, :, :] = crop_array(left, opt.crop_height, opt.crop_width)
+
+    input2 = np.ones([1, 3, opt.crop_height, opt.crop_width], 'float32')
+    input2[0, :, :, :] = crop_array(right, opt.crop_height, opt.crop_width)
 
     input1 = Variable(torch.from_numpy(input1).float(), requires_grad=False)
     input2 = Variable(torch.from_numpy(input2).float(), requires_grad=False)
