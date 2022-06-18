@@ -65,6 +65,20 @@ def crop_image(image, crop_height, crop_width):
     return result
 
 
+def crop_array_grayscale(data, crop_height, crop_width):
+    h, w = np.shape(data)
+
+    if h <= crop_height and w <= crop_width:
+        result = np.zeros([crop_height, crop_width], 'float32')
+        result[crop_height - h: crop_height, crop_width - w: crop_width] = data
+    else:
+        start_x = (w - crop_width) // 2
+        start_y = (h - crop_height) // 2
+        result = data[start_y: start_y + crop_height, start_x: start_x + crop_width]
+
+    return result
+
+
 def crop_array(data, crop_height, crop_width):
     n_layers, h, w = np.shape(data)
 
@@ -128,7 +142,7 @@ def main():
             raise Exception("Unsupported dataset")
 
         prediction = predict(left, right)
-        disp = crop_array(disp, opt.crop_height, opt.crop_width)
+        disp = crop_array_grayscale(disp, opt.crop_height, opt.crop_width)
 
         mask = np.logical_and(disp >= 0.001, disp <= opt.max_disp)
         error = np.mean(np.abs(prediction[mask] - disp[mask]))
