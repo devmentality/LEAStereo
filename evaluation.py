@@ -84,8 +84,8 @@ def predict(left, right):
     input1 = crop_array(left, opt.crop_height, opt.crop_width)
     input2 = crop_array(right, opt.crop_height, opt.crop_width)
 
-    input1 = Variable(input1, requires_grad=False)
-    input2 = Variable(input2, requires_grad=False)
+    input1 = Variable(torch.from_numpy(input1).float(), requires_grad=False)
+    input2 = Variable(torch.from_numpy(input2).float(), requires_grad=False)
 
     model.eval()
     if cuda:
