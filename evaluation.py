@@ -144,7 +144,7 @@ def main():
         prediction = predict(left, right)
         disp = crop_array_grayscale(disp, opt.crop_height, opt.crop_width)
 
-        mask = np.logical_and(disp >= 0.001, disp <= opt.max_disp)
+        mask = np.logical_and(disp >= 0.001, disp <= opt.maxdisp)
         error = np.mean(np.abs(prediction[mask] - disp[mask]))
         rate = np.sum(np.abs(prediction[mask] - disp[mask]) > opt.threshold) / np.sum(mask)
         avg_error += error
