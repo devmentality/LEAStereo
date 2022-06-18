@@ -17,8 +17,8 @@ class DispEntropy(nn.Module):
     def forward(self, x):
         x = F.interpolate(x, [self.maxdisp, x.size()[3]*3, x.size()[4]*3], mode='trilinear', align_corners=False)
         x = torch.squeeze(x, 1)
-        e = torch.sum(-F.softmax(x,dim=1) * F.log_softmax(x,dim=1),1)
-        m = 1.0- torch.isnan(e).type(torch.cuda.FloatTensor)
+        e = torch.sum(-F.softmax(x, dim=1) * F.log_softmax(x, dim=1), 1)
+        m = 1.0 - torch.isnan(e).type(torch.cuda.FloatTensor)
         x = e*m
         x = self.softmax(x)
         return x
