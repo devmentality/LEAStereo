@@ -153,8 +153,10 @@ def main():
             current_file) - 1] + " ==> EPE Error: {:.4f}, Error Rate: {:.4f}".format(error, rate))
 
         leftname = file_path + current_file + '_LEFT_RGB.tif'
-        savename = opt.save_path + current_file + '.png'
-        in_savename = opt.save_path + current_file + '_in.png'
+
+        _, sample_name = current_file.rsplit('/', maxsplit=1)
+        savename = opt.save_path + sample_name + '.png'
+        in_savename = opt.save_path + sample_name + '_in.png'
 
         skimage.io.imsave(savename, prediction)
         left = Image.open(leftname)
