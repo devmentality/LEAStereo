@@ -11,8 +11,8 @@ def count_parameters_in_MB(model):
 
 def comp_multadds(model, input_size=(3, 224, 224), half=False):
     input_size = (1,) + tuple(input_size)
-    model = model.cpu()
-    input_data = torch.randn(input_size).cpu()
+    # model = model.cpu()
+    input_data = torch.randn(input_size) # .cpu()
     model = add_flops_counting_methods(model)
     if half:
         input_data = input_data.half()
