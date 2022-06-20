@@ -135,7 +135,7 @@ def main():
     f = open(file_list, 'r')
     filelist = f.readlines()
     avg_error = 0
-    avg_rate = 0
+    three_px_error_all = 0
 
     for index in range(len(filelist)):
         current_file = filelist[index][:-1]
@@ -173,11 +173,19 @@ def main():
 
         mask = np.logical_and(disp >= 0.001, disp <= opt.maxdisp)
         error = np.mean(np.abs(prediction[mask] - disp[mask]))
-        rate = np.sum(np.abs(prediction[mask] - disp[mask]) > opt.threshold) / np.sum(mask)
         avg_error += error
-        avg_rate += rate
-        print("===> Frame {}: ".format(index) + current_file[0:len(
-            current_file) - 1] + " ==> EPE Error: {:.4f}, Error Rate: {:.4f}".format(error, rate))
+
+        predicted_disparity = prediction.cpu().detach().numpy()
+        true_disparity = disp
+        shape = true_disparity.shape
+        abs_diff = np.full(shape, 10000)
+        abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
+        correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
+
+        three_px_error = 1 - (float(np.sum(correct)) / float(len(np.argwhere(mask))))
+        three_px_error_all += three_px_error
+
+        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error}")
 
         skimage.io.imsave(savename, prediction)
         left = Image.open(leftname)
@@ -185,9 +193,8 @@ def main():
         skimage.io.imsave(in_savename, left)
 
     avg_error = avg_error / len(filelist)
-    avg_rate = avg_rate / len(filelist)
-    print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG Error Rate: {:.4f}".format(len(filelist), avg_error,
-                                                                                          avg_rate))
+    avg_three_px_error = three_px_error_all / len(filelist)
+    print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG 3px Error: {:.4f}".format(len(filelist), avg_error, avg_three_px_error))
 
 
 if __name__ == "__main__":
