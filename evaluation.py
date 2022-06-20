@@ -15,7 +15,7 @@ from torch.autograd import Variable
 from utils.multadds_count import count_parameters_in_MB, comp_multadds
 from retrain.LEAStereo import LEAStereo
 from config_utils.evaluation_args import obtain_evaluation_args
-from dataloaders.datasets.stereo import load_data_dfc2019
+from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite
 
 opt = obtain_evaluation_args()
 
@@ -147,6 +147,12 @@ def main():
             right = data[3: 6, :, :]
             disp = data[6, :, :]
 
+        elif opt.satellite:
+            print(f"Running for satellite {current_file}")
+            data = load_data_satellite(file_path, current_file)
+            left = data[0:3, :, :]
+            right = data[3: 6, :, :]
+            disp = data[6, :, :]
         else:
             raise Exception("Unsupported dataset")
 
