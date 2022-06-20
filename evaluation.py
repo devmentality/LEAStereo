@@ -147,12 +147,20 @@ def main():
             right = data[3: 6, :, :]
             disp = data[6, :, :]
 
+            _, sample_name = current_file.rsplit('/', maxsplit=1)
+            savename = opt.save_path + sample_name + '.png'
+            in_savename = opt.save_path + sample_name + '_in.png'
+
         elif opt.satellite:
             print(f"Running for satellite {current_file}")
             data = load_data_satellite(file_path, current_file)
             left = data[0:3, :, :]
             right = data[3: 6, :, :]
             disp = data[6, :, :]
+
+            savename = opt.save_path + current_file + '.png'
+            in_savename = opt.save_path + current_file + '_in.png'
+
         else:
             raise Exception("Unsupported dataset")
 
@@ -168,10 +176,6 @@ def main():
             current_file) - 1] + " ==> EPE Error: {:.4f}, Error Rate: {:.4f}".format(error, rate))
 
         leftname = file_path + current_file + '_LEFT_RGB.tif'
-
-        _, sample_name = current_file.rsplit('/', maxsplit=1)
-        savename = opt.save_path + sample_name + '.png'
-        in_savename = opt.save_path + sample_name + '_in.png'
 
         skimage.io.imsave(savename, prediction)
         left = Image.open(leftname)
