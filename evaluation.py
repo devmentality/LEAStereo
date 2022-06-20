@@ -175,7 +175,7 @@ def main():
         error = np.mean(np.abs(prediction[mask] - disp[mask]))
         avg_error += error
 
-        predicted_disparity = prediction.cpu().detach().numpy()
+        predicted_disparity = prediction
         true_disparity = disp
         shape = true_disparity.shape
         abs_diff = np.full(shape, 10000)
