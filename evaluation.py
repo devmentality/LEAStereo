@@ -149,6 +149,8 @@ def main():
 
             _, sample_name = current_file.rsplit('/', maxsplit=1)
             savename = opt.save_path + sample_name + '.png'
+
+            leftname = file_path + current_file + '_LEFT_RGB.tif'
             in_savename = opt.save_path + sample_name + '_in.png'
 
         elif opt.satellite:
@@ -159,6 +161,8 @@ def main():
             disp = data[6, :, :]
 
             savename = opt.save_path + current_file + '.png'
+
+            leftname = file_path + current_file + '/satiml.png'
             in_savename = opt.save_path + current_file + '_in.png'
 
         else:
@@ -174,8 +178,6 @@ def main():
         avg_rate += rate
         print("===> Frame {}: ".format(index) + current_file[0:len(
             current_file) - 1] + " ==> EPE Error: {:.4f}, Error Rate: {:.4f}".format(error, rate))
-
-        leftname = file_path + current_file + '_LEFT_RGB.tif'
 
         skimage.io.imsave(savename, prediction)
         left = Image.open(leftname)
