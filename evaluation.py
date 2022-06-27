@@ -208,7 +208,7 @@ def main():
         left = crop_image(left, opt.crop_height, opt.crop_width)
         skimage.io.imsave(in_savename, left)
 
-        error_image = make_error_image_array(prediction, ~correct)
+        error_image = make_error_image_array(prediction, ~correct & mask)
         skimage.io.imsave(error_savename, error_image)
 
     avg_error = avg_error / len(filelist)
