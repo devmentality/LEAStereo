@@ -102,6 +102,20 @@ def crop_array(data, crop_height, crop_width):
     return result
 
 
+def make_error_image_array(prediction, error_mask):
+    h, w = np.shape(prediction)
+    error_layers = np.zeros((3, h, w))
+    error_layers[0, :, :] = prediction
+    error_layers[1, :, :] = prediction
+    error_layers[2, :, :] = prediction
+
+    error_layers[0, error_mask] = 255
+    error_layers[1, error_mask] = 0
+    error_layers[2, error_mask] = 0
+
+    return np.moveaxis(error_layers, [0], [2])
+
+
 def predict(left, right):
     _, height, width = np.shape(left)
     input1 = np.ones([1, 3, opt.crop_height, opt.crop_width], 'float32')
@@ -152,6 +166,7 @@ def main():
 
             leftname = file_path + current_file + '_LEFT_RGB.tif'
             in_savename = opt.save_path + sample_name + '_in.png'
+            error_savename = opt.save_path + sample_name + '_error.png'
 
         elif opt.satellite:
             print(f"Running for satellite {current_file}")
@@ -164,6 +179,7 @@ def main():
 
             leftname = file_path + current_file + '/satiml.png'
             in_savename = opt.save_path + current_file + '_in.png'
+            error_savename = opt.save_path + current_file + '_error.png'
 
         else:
             raise Exception("Unsupported dataset")
@@ -191,6 +207,9 @@ def main():
         left = Image.open(leftname)
         left = crop_image(left, opt.crop_height, opt.crop_width)
         skimage.io.imsave(in_savename, left)
+
+        error_image = make_error_image_array(prediction, ~correct)
+        skimage.io.imsave(error_savename, error_image)
 
     avg_error = avg_error / len(filelist)
     avg_three_px_error = three_px_error_all / len(filelist)
