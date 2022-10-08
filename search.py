@@ -190,7 +190,7 @@ class Trainer(object):
                         input2_search = input2_search.cuda()
                         target_search = target_search.cuda()
 
-                    target_search=torch.squeeze(target_search,1)
+                    target_search = torch.squeeze(target_search, 1)
                     mask_search = target_search < self.args.max_disp
                     mask_search.detach_()
 
@@ -248,7 +248,7 @@ class Trainer(object):
                 input2 = input2.cuda()
                 target = target.cuda()
 
-            target=torch.squeeze(target,1)
+            target = torch.squeeze(target,1)
             mask = target < self.args.max_disp
             mask.detach_()
             valid = target[mask].size()[0]
@@ -295,6 +295,7 @@ class Trainer(object):
                 'optimizer_M': self.optimizer_M.state_dict(),
                 'best_pred': self.best_pred,
             }, is_best)
+
 
 if __name__ == "__main__":
    

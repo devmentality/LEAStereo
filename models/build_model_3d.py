@@ -6,6 +6,7 @@ from models.operations_3d import *
 from models.decoding_formulas import Decoder
 import pdb
 
+
 class AutoMatching(nn.Module):
     def __init__(self, num_layers, filter_multiplier=8, block_multiplier=2, step=3, cell=cell_level_search.Cell):
         super(AutoMatching, self).__init__()
@@ -181,7 +182,6 @@ class AutoMatching(nn.Module):
                     normalized_betas[layer][2] = F.softmax(self.betas[layer][2], dim=-1)
                     normalized_betas[layer][3][:2] = F.softmax(self.betas[layer][3][:2], dim=-1) * (2/3)
 
-
         for layer in range(self._num_layers):
 
             if layer == 0:
@@ -348,20 +348,19 @@ class AutoMatching(nn.Module):
             self.level_6 = self.level_6[-2:]
             self.level_12 = self.level_12[-2:]
             self.level_24 = self.level_24[-2:]
-        
 
-        #define upsampling
+        # define upsampling
         d, h, w = stem.size()[2], stem.size()[3], stem.size()[4]
         upsample_6  = nn.Upsample(size=stem.size()[2:], mode='trilinear', align_corners=True)
         upsample_12 = nn.Upsample(size=[d//2, h//2, w//2], mode='trilinear', align_corners=True)
         upsample_24 = nn.Upsample(size=[d//4, h//4, w//4], mode='trilinear', align_corners=True)
 
-        result_3  = self.last_3(self.level_3[-1])
-        result_6  = self.last_3(upsample_6(self.last_6(self.level_6[-1])))
+        result_3 = self.last_3(self.level_3[-1])
+        result_6 = self.last_3(upsample_6(self.last_6(self.level_6[-1])))
         result_12 = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(self.level_12[-1])))))
         result_24 = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(self.last_24(self.level_24[-1]))))))
         
-        sum_matching_map =result_3 + result_6 + result_12 + result_24
+        sum_matching_map = result_3 + result_6 + result_12 + result_24
         return sum_matching_map
 
     def _initialize_alphas_betas(self):
@@ -382,7 +381,6 @@ class AutoMatching(nn.Module):
 
         [self.register_parameter(name, torch.nn.Parameter(param)) for name, param in zip(self._arch_param_names, self._arch_parameters)]
 
-
     def arch_parameters(self):
         return [param for name, param in self.named_parameters() if name in self._arch_param_names]
 
@@ -392,4 +390,3 @@ class AutoMatching(nn.Module):
     def genotype(self):
         decoder = Decoder(self.alphas_cell, self._block_multiplier, self._step)
         return decoder.genotype_decode()
-
