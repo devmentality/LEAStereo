@@ -1,5 +1,5 @@
 import argparse
-
+from .leastereo_args import add_leastereo_args
 
 def obtain_predict_args():
     parser = argparse.ArgumentParser(description='LEStereo Prediction')
@@ -20,19 +20,7 @@ def obtain_predict_args():
     parser.add_argument('--satellite', type=int, default=0, help='Satellite? Default=False')
     parser.add_argument('--mvs3d', type=int, default=0, help='MVS3D? Default=False')
 
-    # LEStereo params
-    parser.add_argument('--fea_num_layers', type=int, default=6)
-    parser.add_argument('--mat_num_layers', type=int, default=12)
-    parser.add_argument('--fea_filter_multiplier', type=int, default=8)
-    parser.add_argument('--mat_filter_multiplier', type=int, default=8)
-    parser.add_argument('--fea_block_multiplier', type=int, default=4)
-    parser.add_argument('--mat_block_multiplier', type=int, default=4)
-    parser.add_argument('--fea_step', type=int, default=3)
-    parser.add_argument('--mat_step', type=int, default=3)
-    parser.add_argument('--net_arch_fea', default=None, type=str)
-    parser.add_argument('--cell_arch_fea', default=None, type=str)
-    parser.add_argument('--net_arch_mat', default=None, type=str)
-    parser.add_argument('--cell_arch_mat', default=None, type=str)
+    add_leastereo_args(parser)
 
     args = parser.parse_args()
     return args

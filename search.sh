@@ -1,4 +1,6 @@
 CUDA_VISIBLE_DEVICES=1 python search.py \
+                    --dataset 'sceneflow' \
+                    --listset 'sceneflow_demo' \
                     --batch-size 1  \
                     --dataset sceneflow \
                     --crop_height 192  \

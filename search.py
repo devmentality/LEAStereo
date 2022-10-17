@@ -5,7 +5,7 @@ import torch.nn as nn
 from tqdm import tqdm
 from collections import OrderedDict
 from mypath import Path
-from dataloaders import make_data_loader
+from dataloaders.make_data_loaders import make_data_loader
 from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
 from utils.summaries import TensorboardSummary

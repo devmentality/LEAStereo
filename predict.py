@@ -184,28 +184,6 @@ def load_data(leftname, rightname):
     return temp_data
 
 
-def test_kitti(leftname, rightname, savename):
-    input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
-
-    input1 = Variable(input1, requires_grad=False)
-    input2 = Variable(input2, requires_grad=False)
-
-    model.eval()
-    if cuda:
-        input1 = input1.cuda()
-        input2 = input2.cuda()
-    with torch.no_grad():
-        prediction = model(input1, input2)
-
-    temp = prediction.cpu()
-    temp = temp.detach().numpy()
-    if height <= opt.crop_height and width <= opt.crop_width:
-        temp = temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
-    else:
-        temp = temp[0, :, :]
-    skimage.io.imsave(savename, (temp * 256).astype('uint16'))
-
-
 def test_satellite(leftname, rightname, savename, in_savename):
     input1, input2, height, width = test_transform(load_data(leftname, rightname), opt.crop_height, opt.crop_width)
 
@@ -284,18 +262,6 @@ if __name__ == "__main__":
             savename = opt.save_path + current_file + '.png'
             in_savename = opt.save_path + current_file + '_in.png'
             test_satellite(leftname, rightname, savename, in_savename)
-
-        if opt.kitti2015:
-            leftname = file_path + 'image_2/' + current_file[0: len(current_file) - 1]
-            rightname = file_path + 'image_3/' + current_file[0: len(current_file) - 1]
-            savename = opt.save_path + current_file[0: len(current_file) - 1]
-            test_kitti(leftname, rightname, savename)
-
-        if opt.kitti2012:
-            leftname = file_path + 'colored_0/' + current_file[0: len(current_file) - 1]
-            rightname = file_path + 'colored_1/' + current_file[0: len(current_file) - 1]
-            savename = opt.save_path + current_file[0: len(current_file) - 1]
-            test_kitti(leftname, rightname, savename)
 
         if opt.sceneflow:
             print(f'Running for sceneflow {index}')

@@ -1,21 +1,22 @@
 import argparse
+from .leastereo_args import add_leastereo_args_without_arch
 
 def obtain_search_args():
     parser = argparse.ArgumentParser(description="LEStereo Searching...")
     parser.add_argument('--clean-module', type=int, default=0)
     parser.add_argument('--dataset', type=str, default='sceneflow',
-                        choices=['sceneflow', 'kitti15', 'kitti12', 'middlebury'],
+                        choices=['sceneflow'],
                         help='dataset name (default: sceneflow)')
+    parser.add_argument('--listset', type=str, required=True,
+                        help='Path to lists under dataloaders/lists subfolder')
     parser.add_argument('--stage', type=str, default='search',
                         choices=['search', 'train'])
-    parser.add_argument('--fea_num_layers', type=int, default=6)
-    parser.add_argument('--mat_num_layers', type=int, default=12)
-    parser.add_argument('--fea_filter_multiplier', type=int, default=8)
-    parser.add_argument('--mat_filter_multiplier', type=int, default=8)
-    parser.add_argument('--fea_block_multiplier', type=int, default=4)
-    parser.add_argument('--mat_block_multiplier', type=int, default=4)
-    parser.add_argument('--fea_step', type=int, default=2)
-    parser.add_argument('--mat_step', type=int, default=2)
+
+    add_leastereo_args_without_arch(parser)
+    # Search had a little different defaults. Does it matter?
+    # parser.add_argument('--fea_step', type=int, default=2)
+    # parser.add_argument('--mat_step', type=int, default=2)
+
     parser.add_argument('--workers', type=int, default=0,
                         metavar='N', help='dataloader threads')   
     parser.add_argument('--max_disp', type=int, default=192, help="max disp")
