@@ -35,7 +35,7 @@ def make_data_loader(args, **kwargs):
 
     # SceneFlow
     elif args.dataset == 'sceneflow':
-        if args.listest is None:
+        if args.listset is None:
             train_weights_list = 'dataloaders/lists/sceneflow_search_weights.list'  # randomly select 10,000 from the original training set
             train_arch_list = 'dataloaders/lists/sceneflow_search_arch.list'  # randomly select 10,000 from the original training set
             train_list = 'dataloaders/lists/sceneflow_train.list'  # original training set: 35,454

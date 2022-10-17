@@ -88,7 +88,7 @@ class DatasetFromList(data.Dataset):
             self.file_list = f.readlines()
 
     def __getitem__(self, index):
-        curr_file = self.file_list[index][:-1]
+        curr_file = self.file_list[index].rstrip()
 
         if self.args.dataset == 'sceneflow':
             temp_data = load_data_sceneflow(Path.db_root_dir('sceneflow'), curr_file)

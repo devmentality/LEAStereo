@@ -2,7 +2,7 @@ class Path(object):
     @staticmethod
     def db_root_dir(dataset):
         if dataset == 'sceneflow':
-            return './dataset/SceneFlow/'
+            return './dataset/sceneflow/'
         elif dataset == 'kitti15':
             return './dataset/kitti2015/training/'
         elif dataset == 'kitti12':
