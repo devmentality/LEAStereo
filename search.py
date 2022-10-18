@@ -8,7 +8,7 @@ from mypath import Path
 from dataloaders.make_data_loaders import make_data_loader
 from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
-from utils.summaries import TensorboardSummary
+from torch.utils.tensorboard import SummaryWriter
 from utils.copy_state_dict import copy_state_dict
 from torch.autograd import Variable
 from time import time
@@ -51,11 +51,9 @@ class Trainer(object):
     def __init__(self, args):
         self.args = args
 
-        # Define Saver
         self.saver = Saver(args)
-        self.saver.save_experiment_config()
         # Define Tensorboard Summary
-        self.summary = TensorboardSummary(self.saver.experiment_dir)
+        self.summary = SummaryWriter(self.saver.logs_dir)
         self.writer = self.summary.create_summary()
 
         kwargs = {'num_workers': args.workers, 'pin_memory': True, 'drop_last': True}
@@ -165,7 +163,7 @@ class Trainer(object):
                 input2 = input2.cuda()
                 target = target.cuda()
 
-            target=torch.squeeze(target,1)
+            target = torch.squeeze(target,1)
             mask = target < self.args.max_disp
             mask.detach_()
             valid = target[mask].size()[0]
@@ -208,11 +206,6 @@ class Trainer(object):
                 tbar.set_description('Train loss: %.3f' % (train_loss / (i + 1)))
                 self.writer.add_scalar('train/total_loss_iter', loss.item(), i + num_img_tr * epoch)
 
-            #Show 10 * 3 inference results each epoch
-            # if i % (num_img_tr // 10) == 0:
-            #     global_step = i + num_img_tr * epoch
-            #     self.summary.visualize_image_stereo(self.writer, input1, target, output, global_step)
-
         self.writer.add_scalar('train/total_loss_epoch', train_loss, epoch)
         print("=== Train ===> Epoch :{} Error: {:.4f}".format(epoch, train_loss/valid_iteration))
         print(self.model.module.feature.alphas)
@@ -253,7 +246,7 @@ class Trainer(object):
             mask.detach_()
             valid = target[mask].size()[0]
 
-            if valid>0:
+            if valid > 0:
                 with torch.no_grad():
                     output = self.model(input1, input2)
 
@@ -280,7 +273,7 @@ class Trainer(object):
         print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error/valid_iteration, three_px_acc_all/valid_iteration))
 
         # save model
-        new_pred = epoch_error/valid_iteration # three_px_acc_all/valid_iteration
+        new_pred = epoch_error/valid_iteration  # three_px_acc_all/valid_iteration
         if new_pred < self.best_pred: 
             is_best = True
             self.best_pred = new_pred
@@ -298,7 +291,6 @@ class Trainer(object):
 
 
 if __name__ == "__main__":
-   
     trainer = Trainer(opt)
     print('Starting Epoch:', trainer.args.start_epoch)
     print('Total Epoches:', trainer.args.epochs)

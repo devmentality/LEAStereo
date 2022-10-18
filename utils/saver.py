@@ -1,58 +1,50 @@
 import os
+import sys
 import shutil
 import torch
-from collections import OrderedDict
-import glob
 
 
-class Saver(object):
-
+class Saver:
+    """
+        Saves data for experiment:
+        directory: run/[dataset]-[stage]/[experiment_name]
+        What to save?
+            - parameters: lr, epochs, crop_height, crop_width into parameters.txt
+            - best checkpoints: under checkpoints/best_{checkpoint_index}.pth
+            - tensorboard logs under logs/
+    """
     def __init__(self, args):
-        self.args = args
-        self.directory = os.path.join('run', args.dataset)
-        self.runs = sorted(glob.glob(os.path.join(self.directory, 'experiment_*')))
-        run_id = max([int(x.split('_')[-1]) for x in self.runs]) + 1 if self.runs else 0
+        self.experiment = args.experiment if args.experiment is not None else 'default'
+        self.directory = os.path.join('run', f"{args.dataset}-{args.stage}", self.experiment)
+        self.logs_dir = os.path.join(self.directory, "logs")
+        self.checkpoints_dir = os.path.join(self.directory, "checkpoints")
 
-        self.experiment_dir = os.path.join(self.directory, 'experiment_{}'.format(str(run_id)))
-        if not os.path.exists(self.experiment_dir):
-            os.makedirs(self.experiment_dir)
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory, exist_ok=False)
+            os.makedirs(self.logs_dir, exist_ok=False)
+            os.makedirs(self.checkpoints_dir, exist_ok=False)
+        else:
+            print(f"Experiment with dataset {args.dataset}, stage {args.stage} and name {self.experiment} already exists")
+            sys.exit(1)
 
-    def save_checkpoint(self, state, is_best, filename='checkpoint.pth.tar'):
-        """Saves checkpoint to disk"""
-        filename = os.path.join(self.experiment_dir, filename)
+        # TODO: Should depend on stage
+        with open("parameters.txt", "w") as params_file:
+            params = {
+                "dataset": args.dataset,
+                "lr": args.lr,
+                "epochs": args.epochs,
+                "crop_height": args.crop_height,
+                "crop_width": args.crop_width
+            }
+
+            for key in params:
+                params_file.write(f"{key}:{params[key]}\n")
+
+    def save_checkpoint(self, epoch, state, is_best):
+        filename = os.path.join(self.checkpoints_dir, f"epoch_{epoch}.pth")
         torch.save(state, filename)
+
         if is_best:
-                best_pred = state['best_pred']
-                with open(os.path.join(self.experiment_dir, 'best_pred.txt'), 'w') as f:
-                    f.write(str(best_pred))
-                if self.runs:
-                    previous_miou = [0.0]
-                    for run in self.runs:
-                        run_id = run.split('_')[-1]
-                        path = os.path.join(self.directory, 'experiment_{}'.format(str(run_id)), 'best_pred.txt')
-                        if os.path.exists(path):
-                            with open(path, 'r') as f:
-                                miou = float(f.readline())
-                                previous_miou.append(miou)
-                        else:
-                            continue
-                    max_miou = max(previous_miou)
-                    if best_pred > max_miou:
-                        shutil.copyfile(filename, os.path.join(self.directory, 'model_best.pth.tar'))
-                else:
-                    shutil.copyfile(filename, os.path.join(self.directory, 'model_best.pth.tar'))
+            shutil.copyfile(filename, os.path.join(self.checkpoints_dir, 'best.pth'))
 
-    def save_experiment_config(self):
-            logfile = os.path.join(self.experiment_dir, 'parameters.txt')
-            log_file = open(logfile, 'w')
-            p = OrderedDict()
-            p['datset'] = self.args.dataset
-            p['lr'] = self.args.lr
-            p['lr_scheduler'] = self.args.lr_scheduler
-            p['epoch'] = self.args.epochs
-            p['crop_height'] = self.args.crop_height
-            p['crop_width'] = self.args.crop_width
-
-            for key, val in p.items():
-                log_file.write(key + ':' + str(val) + '\n')
-            log_file.close()
+        print(f"Checkpoint saved to {filename}")
