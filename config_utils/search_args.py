@@ -1,5 +1,7 @@
 import argparse
-from .leastereo_args import add_leastereo_args_without_arch
+from dataclasses import dataclass
+from .leastereo_args import add_leastereo_args_without_arch, LEAStereoArgsNoArch
+
 
 def obtain_search_args():
     parser = argparse.ArgumentParser(description="LEStereo Searching...")
@@ -75,5 +77,6 @@ def obtain_search_args():
 
     parser.add_argument('--no-val', action='store_true', default=False, 
                         help='skip validation during training')
+    parser.add_argument('--experiment', type=str, default=None, help='experiment name')
     args = parser.parse_args()
     return args

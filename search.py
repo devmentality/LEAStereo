@@ -42,10 +42,10 @@ if opt.epochs is None:
     opt.epochs = epoches[opt.dataset.lower()]
 
 if opt.batch_size is None:
-        opt.batch_size = 4 * len(opt.gpu_ids)
+    opt.batch_size = 4 * len(opt.gpu_ids)
 
 if opt.testBatchSize is None:
-        opt.testBatchSize = opt.batch_size
+    opt.testBatchSize = opt.batch_size
 
 
 class Trainer(object):
@@ -62,7 +62,7 @@ class Trainer(object):
 
         device = 'cpu'
         if cuda:
-            device = torch.cuda.current_device()
+            device = 'cuda'
 
         # Define network
         model = AutoStereo(device=device,
@@ -214,19 +214,20 @@ class Trainer(object):
         print("=== Train ===> Epoch :{} Error: {:.4f}".format(epoch, train_loss/valid_iteration))
         print(self.model.module.feature.alphas)
 
-        #save checkpoint every epoch
-        is_best = False
-        if torch.cuda.device_count() > 1:
-           state_dict = self.model.module.state_dict()
-        else:
-           state_dict = self.model.state_dict()
-        self.saver.save_checkpoint({
-               'epoch': epoch + 1,
-               'state_dict': state_dict,
-               'optimizer_F': self.optimizer_F.state_dict(),
-               'optimizer_M': self.optimizer_M.state_dict(),
-               'best_pred': self.best_pred,
-        }, is_best, filename='checkpoint_{}.pth.tar'.format(epoch))
+        # save checkpoint every epoch
+        # is_best = False
+        # if torch.cuda.device_count() > 1:
+        #     state_dict = self.model.module.state_dict()
+        # else:
+        #     state_dict = self.model.state_dict()
+        #
+        # self.saver.save_checkpoint(epoch, {
+        #        'epoch': epoch + 1,
+        #        'state_dict': state_dict,
+        #        'optimizer_F': self.optimizer_F.state_dict(),
+        #        'optimizer_M': self.optimizer_M.state_dict(),
+        #        'best_pred': self.best_pred,
+        # }, is_best, filename='checkpoint_{}.pth.tar'.format(epoch))
 
     def validation(self, epoch):
         self.model.eval()
@@ -278,21 +279,25 @@ class Trainer(object):
         print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(avg_epe, avg_three_px_error))
 
         # save model
-        new_pred = epoch_error/valid_iteration  # three_px_acc_all/valid_iteration
-        if new_pred < self.best_pred: 
+
+        if avg_epe < self.best_pred:
             is_best = True
-            self.best_pred = new_pred
-            if torch.cuda.device_count() > 1:
-                state_dict = self.model.module.state_dict()
-            else:
-                state_dict = self.model.state_dict()
-            self.saver.save_checkpoint({
-                'epoch': epoch + 1,
-                'state_dict': state_dict,
-                'optimizer_F': self.optimizer_F.state_dict(),
-                'optimizer_M': self.optimizer_M.state_dict(),
-                'best_pred': self.best_pred,
-            }, is_best)
+            self.best_pred = avg_epe
+        else:
+            is_best = False
+
+        if torch.cuda.device_count() > 1:
+            state_dict = self.model.module.state_dict()
+        else:
+            state_dict = self.model.state_dict()
+
+        self.saver.save_checkpoint(epoch + 1, {
+            'epoch': epoch + 1,
+            'state_dict': state_dict,
+            'optimizer_F': self.optimizer_F.state_dict(),
+            'optimizer_M': self.optimizer_M.state_dict(),
+            'best_pred': self.best_pred,
+        }, is_best)
 
 
 if __name__ == "__main__":
