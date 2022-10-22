@@ -13,6 +13,7 @@ from PIL import Image
 from struct import unpack
 from torch.autograd import Variable
 from utils.multadds_count import count_parameters_in_MB, comp_multadds
+from utils.metrics import calculate_3px_error
 from retrain.LEAStereo import LEAStereo
 from config_utils.evaluation_args import obtain_evaluation_args
 from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite
@@ -193,12 +194,8 @@ def main():
 
         predicted_disparity = prediction
         true_disparity = disp
-        shape = true_disparity.shape
-        abs_diff = np.full(shape, 10000)
-        abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
-        correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
 
-        three_px_error = 1 - (float(np.sum(correct)) / float(len(np.argwhere(mask))))
+        three_px_error = calculate_3px_error(predicted_disparity, true_disparity, opt.maxdisp)
         three_px_error_all += three_px_error
 
         print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error}")

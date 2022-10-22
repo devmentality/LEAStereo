@@ -8,6 +8,7 @@ from mypath import Path
 from dataloaders.make_data_loaders import make_data_loader
 from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
+from utils.metrics import calculate_3px_error
 from torch.utils.tensorboard import SummaryWriter
 from utils.copy_state_dict import copy_state_dict
 from torch.autograd import Variable
@@ -53,8 +54,7 @@ class Trainer(object):
 
         self.saver = Saver(args)
         # Define Tensorboard Summary
-        self.summary = SummaryWriter(self.saver.logs_dir)
-        self.writer = self.summary.create_summary()
+        self.writer = SummaryWriter(self.saver.logs_dir)
 
         kwargs = {'num_workers': args.workers, 'pin_memory': True, 'drop_last': True}
 
@@ -149,6 +149,9 @@ class Trainer(object):
         print('Number of Feature Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.module.feature.parameters()])))
         print('Number of Matching Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.module.matching.parameters()])))
 
+        self.train_step = 0
+        self.val_step = 0
+
     def training(self, epoch):
         train_loss = 0.0
         valid_iteration = 0
@@ -204,9 +207,10 @@ class Trainer(object):
                 train_loss += loss.item()
                 valid_iteration += 1
                 tbar.set_description('Train loss: %.3f' % (train_loss / (i + 1)))
-                self.writer.add_scalar('train/total_loss_iter', loss.item(), i + num_img_tr * epoch)
+                self.writer.add_scalar('Train loss', loss.item(), self.train_step + 1)
+                self.train_step += 1
 
-        self.writer.add_scalar('train/total_loss_epoch', train_loss, epoch)
+        self.writer.add_scalar('Train epoch loss', train_loss, epoch)
         print("=== Train ===> Epoch :{} Error: {:.4f}".format(epoch, train_loss/valid_iteration))
         print(self.model.module.feature.alphas)
 
@@ -228,7 +232,7 @@ class Trainer(object):
         self.model.eval()
         
         epoch_error = 0
-        three_px_acc_all = 0
+        three_px_err_all = 0
         valid_iteration = 0
 
         tbar = tqdm(self.val_loader, desc='\r')
@@ -255,22 +259,23 @@ class Trainer(object):
 
                     valid_iteration += 1
 
-                    #computing 3-px error#                
-                    pred_disp = output.cpu().detach()                                                                                                                          
-                    true_disp = target.cpu().detach()
-                    disp_true = true_disp
-                    index = np.argwhere(true_disp<opt.max_disp)
-                    disp_true[index[0][:], index[1][:], index[2][:]] = np.abs(true_disp[index[0][:], index[1][:], index[2][:]]-pred_disp[index[0][:], index[1][:], index[2][:]])
-                    correct = (disp_true[index[0][:], index[1][:], index[2][:]] < 1)|(disp_true[index[0][:], index[1][:], index[2][:]] < true_disp[index[0][:], index[1][:], index[2][:]]*0.05)      
-                    three_px_acc = 1-(float(torch.sum(correct))/float(len(index[0])))
+                    predicted_disparity = output.cpu().detach().numpy()
+                    true_disparity = target.cpu().detach().numpy()
+                    three_px_error = calculate_3px_error(predicted_disparity, true_disparity, opt.max_disp)
 
-                    three_px_acc_all += three_px_acc
-                    print("===> Test({}/{}): Error(EPE): ({:.4f} {:.4f})".format(i, len(self.val_loader), error.item(),three_px_acc))
+                    three_px_err_all += three_px_error
 
-        self.writer.add_scalar('val/EPE', epoch_error/valid_iteration, epoch)
-        self.writer.add_scalar('val/D1_all', three_px_acc_all/valid_iteration, epoch)
+                    print("===> Test({}/{}): Error(EPE): ({:.4f} {:.4f})".format(i, len(self.val_loader), error.item(), three_px_error))
+                    self.writer.add_scalar('Validation EPE', error.item(), self.val_step + 1)
+                    self.writer.add_scalar('Validation 3px error', three_px_error, self.val_step + 1)
+                    self.val_step += 1
 
-        print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(epoch_error/valid_iteration, three_px_acc_all/valid_iteration))
+        avg_three_px_error = three_px_err_all / valid_iteration
+        avg_epe = epoch_error / valid_iteration
+        self.writer.add_scalar('Validation Epoch EPE', avg_epe, epoch)
+        self.writer.add_scalar('Validation Epoch 3px error', avg_three_px_error, epoch)
+
+        print("===> Test: Avg. Error: ({:.4f} {:.4f})".format(avg_epe, avg_three_px_error))
 
         # save model
         new_pred = epoch_error/valid_iteration  # three_px_acc_all/valid_iteration

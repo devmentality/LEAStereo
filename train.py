@@ -16,7 +16,7 @@ from utils.multadds_count import count_parameters_in_MB
 from utils.early_stopping import EarlyStopping
 from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
-
+from utils.metrics import calculate_3px_error
 
 opt = obtain_train_args()
 print(opt)
@@ -176,16 +176,7 @@ def val(epoch):
                 # computing 3-px error (diff < 3px or < 5%)
                 predicted_disparity = disp.cpu().detach().numpy()
                 true_disparity = target.cpu().detach().numpy()
-                shape = true_disparity.shape
-                mask = calculate_validity_mask(true_disparity)
-                abs_diff = np.full(shape, 10000)
-                abs_diff[mask] = np.abs(true_disparity[mask] - predicted_disparity[mask])
-                correct = (abs_diff < 3) | (abs_diff < true_disparity * 0.05)
-                # print(np.sum(correct))
-
-                # print(len(np.argwhere(mask)))
-
-                three_px_error = 1 - (float(np.sum(correct)) / float(len(np.argwhere(mask))))
+                three_px_error = calculate_3px_error(predicted_disparity, true_disparity, opt.maxdisp)
                 three_px_error_all += three_px_error
     
                 print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_error))
