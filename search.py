@@ -5,7 +5,7 @@ import torch.nn as nn
 from tqdm import tqdm
 from collections import OrderedDict
 from mypath import Path
-from dataloaders.make_data_loaders import make_data_loader
+from dataloaders.make_data_loaders import make_search_data_loaders
 from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
 from utils.metrics import calculate_3px_error
@@ -58,7 +58,7 @@ class Trainer(object):
 
         kwargs = {'num_workers': args.workers, 'pin_memory': True, 'drop_last': True}
 
-        self.train_loaderA, self.train_loaderB, self.val_loader, self.test_loader = make_data_loader(args, **kwargs)
+        self.train_loaderA, self.train_loaderB, self.val_loader = make_search_data_loaders(args, **kwargs)
 
         device = 'cpu'
         if cuda:
@@ -213,21 +213,6 @@ class Trainer(object):
         self.writer.add_scalar('Train epoch loss', train_loss, epoch)
         print("=== Train ===> Epoch :{} Error: {:.4f}".format(epoch, train_loss/valid_iteration))
         print(self.model.module.feature.alphas)
-
-        # save checkpoint every epoch
-        # is_best = False
-        # if torch.cuda.device_count() > 1:
-        #     state_dict = self.model.module.state_dict()
-        # else:
-        #     state_dict = self.model.state_dict()
-        #
-        # self.saver.save_checkpoint(epoch, {
-        #        'epoch': epoch + 1,
-        #        'state_dict': state_dict,
-        #        'optimizer_F': self.optimizer_F.state_dict(),
-        #        'optimizer_M': self.optimizer_M.state_dict(),
-        #        'best_pred': self.best_pred,
-        # }, is_best, filename='checkpoint_{}.pth.tar'.format(epoch))
 
     def validation(self, epoch):
         self.model.eval()

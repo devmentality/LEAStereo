@@ -11,7 +11,7 @@ from torch.autograd import Variable
 from time import time
 from retrain.LEAStereo import LEAStereo
 
-from dataloaders.make_data_loaders import make_data_loader
+from dataloaders.make_data_loaders import make_train_data_loaders
 from utils.multadds_count import count_parameters_in_MB
 from utils.early_stopping import EarlyStopping
 from config_utils.train_args import obtain_train_args
@@ -43,7 +43,7 @@ if cuda:
 
 print('===> Loading datasets')
 kwargs = {'num_workers': opt.threads, 'pin_memory': True, 'drop_last':True}
-training_data_loader, testing_data_loader = make_data_loader(opt, **kwargs)
+training_data_loader, val_data_loader = make_train_data_loaders(opt, **kwargs)
 
 print('===> Building model')
 model = LEAStereo(opt, device)
@@ -148,7 +148,7 @@ def val(epoch):
     valid_iteration = 0
     three_px_error_all = 0
     model.eval()
-    for iteration, batch in enumerate(testing_data_loader):
+    for iteration, batch in enumerate(val_data_loader):
         print(f'Validation iteration # {iteration}')
         input1 = Variable(batch[0], requires_grad=False)
         input2 = Variable(batch[1], requires_grad=False)
@@ -179,7 +179,7 @@ def val(epoch):
                 three_px_error = calculate_3px_error(predicted_disparity, true_disparity, opt.maxdisp)
                 three_px_error_all += three_px_error
     
-                print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(testing_data_loader), error.item(), three_px_error))
+                print("===> Test({}/{}): Error: ({:.4f} {:.4f})".format(iteration, len(val_data_loader), error.item(), three_px_error))
                 sys.stdout.flush()
 
                 tb_writer.add_scalar('Validation EPE', error.item(), val_step + 1)
