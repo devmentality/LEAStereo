@@ -31,7 +31,7 @@ def make_ranges(coeff: List[float], size: int) -> List[Tuple]:
 def save_list(lists_dir: str, list_name: str, names: List[str]):
     list_filename = os.path.join(lists_dir, list_name)
     with open(list_filename, "w") as list_file:
-        list_file.writelines(names)
+        list_file.writelines([name + "\n" for name in names])
 
 
 def build_lists(dataset_dir: str, lists_dir: str):
