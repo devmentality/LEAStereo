@@ -99,57 +99,55 @@ class Trainer(object):
         self.scheduler = LR_Scheduler(args.lr_scheduler, args.lr,
                                       args.epochs, len(self.train_loaderA), min_lr=args.min_lr)
         # Using cuda
-        # if args.cuda:
-        #     self.model = torch.nn.DataParallel(self.model).cuda()
         if args.cuda:
-            self.model = self.model.cuda()
+            self.model = torch.nn.DataParallel(self.model).cuda()
 
         # Resuming checkpoint
         self.best_pred = 100.0
-        # if args.resume is not None:
-        #     if not os.path.isfile(args.resume):
-        #         raise RuntimeError("=> no checkpoint found at '{}'" .format(args.resume))
-        #     checkpoint = torch.load(args.resume)
-        #     args.start_epoch = checkpoint['epoch']
-        #
-        #     # if the weights are wrapped in module object we have to clean it
-        #     if args.clean_module:
-        #         self.model.load_state_dict(checkpoint['state_dict'])
-        #         state_dict = checkpoint['state_dict']
-        #         new_state_dict = OrderedDict()
-        #         for k, v in state_dict.items():
-        #             if k.find('module') != -1:
-        #                 print(1)
-        #                 pdb.set_trace()
-        #                 name = k[7:]  # remove 'module.' of dataparallel
-        #                 new_state_dict[name] = v
-        #         # self.model.load_state_dict(new_state_dict)
-        #         pdb.set_trace()
-        #         copy_state_dict(self.model.state_dict(), new_state_dict)
-        #
-        #     else:
-        #         if torch.cuda.device_count() > 1:  # or args.load_parallel:
-        #             # self.model.module.load_state_dict(checkpoint['state_dict'])
-        #             copy_state_dict(self.model.module.state_dict(), checkpoint['state_dict'])
-        #         else:
-        #             # self.model.load_state_dict(checkpoint['state_dict'])
-        #             copy_state_dict(self.model.module.state_dict(), checkpoint['state_dict'])
-        #
-        #     if not args.ft:
-        #         # self.optimizer.load_state_dict(checkpoint['optimizer'])
-        #         copy_state_dict(self.optimizer_M.state_dict(), checkpoint['optimizer_M'])
-        #         copy_state_dict(self.optimizer_F.state_dict(), checkpoint['optimizer_F'])
-        #     self.best_pred = checkpoint['best_pred']
-        #     print("=> loaded checkpoint '{}' (epoch {})"
-        #           .format(args.resume, checkpoint['epoch']))
+        if args.resume is not None:
+            if not os.path.isfile(args.resume):
+                raise RuntimeError("=> no checkpoint found at '{}'" .format(args.resume))
+            checkpoint = torch.load(args.resume)
+            args.start_epoch = checkpoint['epoch']
+
+            # if the weights are wrapped in module object we have to clean it
+            if args.clean_module:
+                self.model.load_state_dict(checkpoint['state_dict'])
+                state_dict = checkpoint['state_dict']
+                new_state_dict = OrderedDict()
+                for k, v in state_dict.items():
+                    if k.find('module') != -1:
+                        print(1)
+                        pdb.set_trace()
+                        name = k[7:]  # remove 'module.' of dataparallel
+                        new_state_dict[name] = v
+                # self.model.load_state_dict(new_state_dict)
+                pdb.set_trace()
+                copy_state_dict(self.model.state_dict(), new_state_dict)
+
+            else:
+                if torch.cuda.device_count() > 1:  # or args.load_parallel:
+                    # self.model.module.load_state_dict(checkpoint['state_dict'])
+                    copy_state_dict(self.model.module.state_dict(), checkpoint['state_dict'])
+                else:
+                    # self.model.load_state_dict(checkpoint['state_dict'])
+                    copy_state_dict(self.model.module.state_dict(), checkpoint['state_dict'])
+
+            if not args.ft:
+                # self.optimizer.load_state_dict(checkpoint['optimizer'])
+                copy_state_dict(self.optimizer_M.state_dict(), checkpoint['optimizer_M'])
+                copy_state_dict(self.optimizer_F.state_dict(), checkpoint['optimizer_F'])
+            self.best_pred = checkpoint['best_pred']
+            print("=> loaded checkpoint '{}' (epoch {})"
+                  .format(args.resume, checkpoint['epoch']))
 
         # Clear start epoch if fine-tuning
         if args.ft:
             args.start_epoch = 0
 
         print('Total number of model parameters : {}'.format(sum([p.data.nelement() for p in self.model.parameters()])))
-        print('Number of Feature Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.feature.parameters()])))
-        print('Number of Matching Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.matching.parameters()])))
+        print('Number of Feature Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.module.feature.parameters()])))
+        print('Number of Matching Net parameters: {}'.format(sum([p.data.nelement() for p in self.model.module.matching.parameters()])))
 
         self.train_step = 0
         self.val_step = 0
@@ -214,7 +212,7 @@ class Trainer(object):
 
         self.writer.add_scalar('Train epoch loss', train_loss, epoch)
         print("=== Train ===> Epoch :{} Error: {:.4f}".format(epoch, train_loss/valid_iteration))
-        print(self.model.feature.alphas)
+        print(self.model.module.feature.alphas)
 
     def validation(self, epoch):
         self.model.eval()
@@ -273,10 +271,10 @@ class Trainer(object):
         else:
             is_best = False
 
-        #if torch.cuda.device_count() > 1:
-        #    state_dict = self.model.module.state_dict()
-        #else:
-        state_dict = self.model.state_dict()
+        if torch.cuda.device_count() > 1:
+            state_dict = self.model.module.state_dict()
+        else:
+            state_dict = self.model.state_dict()
 
         self.saver.save_checkpoint(epoch + 1, {
             'epoch': epoch + 1,
