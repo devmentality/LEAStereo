@@ -60,8 +60,8 @@ print('Matching Net Params = %.2fMB' % count_parameters_in_MB(model.matching))
 # mult_adds = comp_multadds(model, input_size=(3,opt.crop_height, opt.crop_width)) #(3,192, 192))
 # print("compute_average_flops_cost = %.2fMB" % mult_adds)
 
-if cuda:
-    model = torch.nn.DataParallel(model).cuda()
+#if cuda:
+#    model = torch.nn.DataParallel(model).cuda()
 
 torch.backends.cudnn.benchmark = True
 
