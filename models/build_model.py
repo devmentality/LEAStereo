@@ -40,8 +40,7 @@ class AutoStereo(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-    def forward(self, x, y): 
-
+    def forward(self, x, y):
         x = self.feature(x)       
         y = self.feature(y) 
 
@@ -49,12 +48,12 @@ class AutoStereo(nn.Module):
             cost = x.new().resize_(x.size()[0], x.size()[1]*2, int(self.maxdisp/3),  x.size()[2],  x.size()[3]).zero_()
 
         for i in range(int(self.maxdisp/3)):
-            if i > 0 : 
-                cost[:,:x.size()[1], i,:,i:] = x[:,:,:,i:]
-                cost[:,x.size()[1]:, i,:,i:] = y[:,:,:,:-i]
+            if i > 0:
+                cost[:, :x.size()[1], i, :, i:] = x[:, :, :, i:]
+                cost[:, x.size()[1]:, i, :, i:] = y[:, :, :, :-i]
             else:
-                cost[:,:x.size()[1],i,:,i:] = x
-                cost[:,x.size()[1]:,i,:,i:] = y
+                cost[:, :x.size()[1], i, :, i:] = x
+                cost[:, x.size()[1]:, i, :, i:] = y
         
         cost = self.matching(cost)     
         disp0 = self.disp(cost)    

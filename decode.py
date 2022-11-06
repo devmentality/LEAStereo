@@ -5,6 +5,7 @@ import torch
 from models.decoding_formulas import Decoder
 from config_utils.decode_args import obtain_decode_args
 
+
 class Loader(object):
     def __init__(self, args):
         self.args = args
@@ -37,6 +38,7 @@ class Loader(object):
         mat_genotype = self.decoder_mat.genotype_decode()
         return fea_genotype, mat_genotype
 
+
 def get_new_network_cell():
     args = obtain_decode_args()
     load_model = Loader(args)
@@ -60,6 +62,7 @@ def get_new_network_cell():
 
     fea_cell_name = os.path.join(dir_name, 'feature_cell_structure')    
     mat_cell_name = os.path.join(dir_name, 'matching_cell_structure')
+
 
 if __name__ == '__main__':
     get_new_network_cell()

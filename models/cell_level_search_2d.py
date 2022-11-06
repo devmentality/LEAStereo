@@ -2,8 +2,8 @@ import torch.nn.functional as F
 from models.operations_2d import *
 from models.genotypes_2d import PRIMITIVES
 
-class MixedOp(nn.Module):
 
+class MixedOp(nn.Module):
     def __init__(self, C, stride):
         super(MixedOp, self).__init__()
         self._ops = nn.ModuleList()
@@ -18,11 +18,9 @@ class MixedOp(nn.Module):
 
 
 class Cell(nn.Module):
-
     def __init__(self, steps, block_multiplier, prev_prev_fmultiplier,
                  prev_fmultiplier_down, prev_fmultiplier_same, prev_fmultiplier_up,
                  filter_multiplier):
-
         super(Cell, self).__init__()
 
         self.C_in = block_multiplier * filter_multiplier
@@ -78,7 +76,6 @@ class Cell(nn.Module):
         return F.interpolate(prev_feature, (feature_size_h, feature_size_w), mode='bilinear', align_corners=True)
 
     def forward(self, s0, s1_down, s1_same, s1_up, n_alphas):
-
         if s1_down is not None:
             s1_down = self.prev_feature_resize(s1_down, 'down')
             s1_down = self.preprocess_down(s1_down)
@@ -91,10 +88,11 @@ class Cell(nn.Module):
             s1_up = self.preprocess_up(s1_up)
             size_h, size_w = s1_up.shape[2], s1_up.shape[3]
         all_states = []
-        if s0 is not None:
 
+        if s0 is not None:
             s0 = F.interpolate(s0, (size_h, size_w), mode='bilinear', align_corners=True) if (s0.shape[2] != size_h) or (s0.shape[3] != size_w) else s0
             s0 = self.pre_preprocess(s0) if (s0.shape[1] != self.C_out) else s0
+
             if s1_down is not None:
                 states_down = [s0, s1_down]
                 all_states.append(states_down)
@@ -134,7 +132,6 @@ class Cell(nn.Module):
             concat_feature = torch.cat(states[-self.block_multiplier:], dim=1)
             final_concates.append(concat_feature)
         return final_concates
-
 
     def _initialize_weights(self):
         for m in self.modules():

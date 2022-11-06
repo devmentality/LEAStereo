@@ -2,26 +2,27 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import models.cell_level_search_2d as cell_level_search
+from models.cell_level_search_2d import Cell
 from models.genotypes_2d import PRIMITIVES
 from models.operations_2d import *
 from models.decoding_formulas import Decoder
 import pdb
 
 
-class DispEntropy(nn.Module):
-    def __init__(self, maxdisp):
-        super(DispEntropy, self).__init__()
-        self.softmax = nn.Softmin(dim=1)
-        self.maxdisp = maxdisp
-
-    def forward(self, x):
-        x = F.interpolate(x, [self.maxdisp, x.size()[3]*3, x.size()[4]*3], mode='trilinear', align_corners=False)
-        x = torch.squeeze(x, 1)
-        e = torch.sum(-F.softmax(x, dim=1) * F.log_softmax(x, dim=1), 1)
-        m = 1.0 - torch.isnan(e).type(torch.cuda.FloatTensor)
-        x = e*m
-        x = self.softmax(x)
-        return x
+# class DispEntropy(nn.Module):
+#     def __init__(self, maxdisp):
+#         super(DispEntropy, self).__init__()
+#         self.softmax = nn.Softmin(dim=1)
+#         self.maxdisp = maxdisp
+#
+#     def forward(self, x):
+#         x = F.interpolate(x, [self.maxdisp, x.size()[3]*3, x.size()[4]*3], mode='trilinear', align_corners=False)
+#         x = torch.squeeze(x, 1)
+#         e = torch.sum(-F.softmax(x, dim=1) * F.log_softmax(x, dim=1), 1)
+#         m = 1.0 - torch.isnan(e).type(torch.cuda.FloatTensor)
+#         x = e*m
+#         x = self.softmax(x)
+#         return x
 
 
 class DisparityRegression(nn.Module):
@@ -58,7 +59,7 @@ class Disp(nn.Module):
 
 
 class AutoFeature(nn.Module):
-    def __init__(self, num_layers, filter_multiplier=8, block_multiplier=4, step=4, cell=cell_level_search.Cell):
+    def __init__(self, num_layers, filter_multiplier=8, block_multiplier=4, step=4):
         super(AutoFeature, self).__init__()
 
         self.cells = nn.ModuleList()
@@ -81,24 +82,24 @@ class AutoFeature(nn.Module):
 
         for i in range(self._num_layers):
             if i == 0:
-                cell1 = cell(self._step, self._block_multiplier, -1,
+                cell1 = Cell(self._step, self._block_multiplier, -1,
                              None, f_initial, None,
                              self._filter_multiplier)
-                cell2 = cell(self._step, self._block_multiplier, -1,
+                cell2 = Cell(self._step, self._block_multiplier, -1,
                              f_initial, None, None,
                              self._filter_multiplier * 2)
                 self.cells += [cell1]
                 self.cells += [cell2]
             elif i == 1:
-                cell1 = cell(self._step, self._block_multiplier, f_initial,
+                cell1 = Cell(self._step, self._block_multiplier, f_initial,
                              None, self._filter_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier)
 
-                cell2 = cell(self._step, self._block_multiplier, -1,
+                cell2 = Cell(self._step, self._block_multiplier, -1,
                              self._filter_multiplier, self._filter_multiplier * 2, None,
                              self._filter_multiplier * 2)
 
-                cell3 = cell(self._step, self._block_multiplier, -1,
+                cell3 = Cell(self._step, self._block_multiplier, -1,
                              self._filter_multiplier * 2, None, None,
                              self._filter_multiplier * 4)
 
@@ -107,19 +108,19 @@ class AutoFeature(nn.Module):
                 self.cells += [cell3]
 
             elif i == 2:
-                cell1 = cell(self._step, self._block_multiplier, self._filter_multiplier,
+                cell1 = Cell(self._step, self._block_multiplier, self._filter_multiplier,
                              None, self._filter_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier)
 
-                cell2 = cell(self._step, self._block_multiplier, self._filter_multiplier * 2,
+                cell2 = Cell(self._step, self._block_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier, self._filter_multiplier * 2, self._filter_multiplier * 4,
                              self._filter_multiplier * 2)
 
-                cell3 = cell(self._step, self._block_multiplier, -1,
+                cell3 = Cell(self._step, self._block_multiplier, -1,
                              self._filter_multiplier * 2, self._filter_multiplier * 4, None,
                              self._filter_multiplier * 4)
 
-                cell4 = cell(self._step, self._block_multiplier, -1,
+                cell4 = Cell(self._step, self._block_multiplier, -1,
                              self._filter_multiplier * 4, None, None,
                              self._filter_multiplier * 8)
 
@@ -129,19 +130,19 @@ class AutoFeature(nn.Module):
                 self.cells += [cell4]
 
             elif i == 3:
-                cell1 = cell(self._step, self._block_multiplier, self._filter_multiplier,
+                cell1 = Cell(self._step, self._block_multiplier, self._filter_multiplier,
                              None, self._filter_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier)
 
-                cell2 = cell(self._step, self._block_multiplier, self._filter_multiplier * 2,
+                cell2 = Cell(self._step, self._block_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier, self._filter_multiplier * 2, self._filter_multiplier * 4,
                              self._filter_multiplier * 2)
 
-                cell3 = cell(self._step, self._block_multiplier, self._filter_multiplier * 4,
+                cell3 = Cell(self._step, self._block_multiplier, self._filter_multiplier * 4,
                              self._filter_multiplier * 2, self._filter_multiplier * 4, self._filter_multiplier * 8,
                              self._filter_multiplier * 4)
 
-                cell4 = cell(self._step, self._block_multiplier, -1,
+                cell4 = Cell(self._step, self._block_multiplier, -1,
                              self._filter_multiplier * 4, self._filter_multiplier * 8, None,
                              self._filter_multiplier * 8)
 
@@ -151,19 +152,19 @@ class AutoFeature(nn.Module):
                 self.cells += [cell4]
 
             else:
-                cell1 = cell(self._step, self._block_multiplier, self._filter_multiplier,
+                cell1 = Cell(self._step, self._block_multiplier, self._filter_multiplier,
                              None, self._filter_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier)
 
-                cell2 = cell(self._step, self._block_multiplier, self._filter_multiplier * 2,
+                cell2 = Cell(self._step, self._block_multiplier, self._filter_multiplier * 2,
                              self._filter_multiplier, self._filter_multiplier * 2, self._filter_multiplier * 4,
                              self._filter_multiplier * 2)
 
-                cell3 = cell(self._step, self._block_multiplier, self._filter_multiplier * 4,
+                cell3 = Cell(self._step, self._block_multiplier, self._filter_multiplier * 4,
                              self._filter_multiplier * 2, self._filter_multiplier * 4, self._filter_multiplier * 8,
                              self._filter_multiplier * 4)
 
-                cell4 = cell(self._step, self._block_multiplier, self._filter_multiplier * 8,
+                cell4 = Cell(self._step, self._block_multiplier, self._filter_multiplier * 8,
                              self._filter_multiplier * 4, self._filter_multiplier * 8, None,
                              self._filter_multiplier * 8)
 
@@ -172,10 +173,10 @@ class AutoFeature(nn.Module):
                 self.cells += [cell3]
                 self.cells += [cell4]
 
-        self.last_3  = ConvBR(self._num_end , self._num_end, 1, 1, 0, bn=False, relu=False) 
-        self.last_6  = ConvBR(self._num_end*2 , self._num_end,    1, 1, 0)  
-        self.last_12 = ConvBR(self._num_end*4 , self._num_end*2,  1, 1, 0)  
-        self.last_24 = ConvBR(self._num_end*8 , self._num_end*4,  1, 1, 0)  
+        self.last_3 = ConvBR(self._num_end, self._num_end, 1, 1, 0, bn=False, relu=False)
+        self.last_6 = ConvBR(self._num_end*2, self._num_end,    1, 1, 0)
+        self.last_12 = ConvBR(self._num_end*4, self._num_end*2,  1, 1, 0)
+        self.last_24 = ConvBR(self._num_end*8, self._num_end*4,  1, 1, 0)
 
     def forward(self, x):
         self.level_3 = []
@@ -237,9 +238,7 @@ class AutoFeature(nn.Module):
                     normalized_betas[layer][2] = F.softmax(self.betas[layer][2], dim=-1)
                     normalized_betas[layer][3][:2] = F.softmax(self.betas[layer][3][:2], dim=-1) * (2/3)
 
-
         for layer in range(self._num_layers):
-
             if layer == 0:
                 level3_new, = self.cells[count](None, None, self.level_3[-1], None, normalized_alphas)
                 count += 1
@@ -446,4 +445,3 @@ class AutoFeature(nn.Module):
     def genotype(self):
         decoder = Decoder(self.alphas_cell, self._block_multiplier, self._step)
         return decoder.genotype_decode()
-
