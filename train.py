@@ -62,6 +62,8 @@ print('Matching Net Params = %.2fMB' % count_parameters_in_MB(model.matching))
 
 #if cuda:
 #    model = torch.nn.DataParallel(model).cuda()
+if cuda:
+    model = model.cuda()
 
 torch.backends.cudnn.benchmark = True
 

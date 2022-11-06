@@ -101,6 +101,8 @@ class Trainer(object):
         # Using cuda
         # if args.cuda:
         #     self.model = torch.nn.DataParallel(self.model).cuda()
+        if args.cuda:
+            self.model = self.model.cuda()
 
         # Resuming checkpoint
         self.best_pred = 100.0
