@@ -293,7 +293,7 @@ class AutoFeature(nn.Module):
                                                                              self.level_12[-1],
                                                                              normalized_alphas)
                 count += 1
-                level6_new = normalized_betas[layer][0][2] * level6_new_1 + knormalized_betas[layer][1][1] * level6_new_2 + normalized_betas[layer][2][
+                level6_new = normalized_betas[layer][0][2] * level6_new_1 + normalized_betas[layer][1][1] * level6_new_2 + normalized_betas[layer][2][
                     0] * level6_new_3
 
                 level12_new_1, level12_new_2 = self.cells[count](None,
