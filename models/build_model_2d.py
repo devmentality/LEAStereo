@@ -172,10 +172,10 @@ class AutoFeature(nn.Module):
                 self.cells += [cell3]
                 self.cells += [cell4]
 
-        self.last_3  = ConvBR(self._num_end , self._num_end, 1, 1, 0, bn=False, relu=False) 
-        self.last_6  = ConvBR(self._num_end*2 , self._num_end,    1, 1, 0)  
-        self.last_12 = ConvBR(self._num_end*4 , self._num_end*2,  1, 1, 0)  
-        self.last_24 = ConvBR(self._num_end*8 , self._num_end*4,  1, 1, 0)  
+        self.last_3  = ConvBR(self._num_end, self._num_end, 1, 1, 0, bn=False, relu=False)
+        self.last_6  = ConvBR(self._num_end*2, self._num_end,    1, 1, 0)
+        self.last_12 = ConvBR(self._num_end*4, self._num_end*2,  1, 1, 0)
+        self.last_24 = ConvBR(self._num_end*8, self._num_end*4,  1, 1, 0)
 
     def forward(self, x):
         self.level_3 = []
@@ -237,9 +237,7 @@ class AutoFeature(nn.Module):
                     normalized_betas[layer][2] = F.softmax(self.betas[layer][2], dim=-1)
                     normalized_betas[layer][3][:2] = F.softmax(self.betas[layer][3][:2], dim=-1) * (2/3)
 
-
         for layer in range(self._num_layers):
-
             if layer == 0:
                 level3_new, = self.cells[count](None, None, self.level_3[-1], None, normalized_alphas)
                 count += 1
@@ -295,7 +293,7 @@ class AutoFeature(nn.Module):
                                                                              self.level_12[-1],
                                                                              normalized_alphas)
                 count += 1
-                level6_new = normalized_betas[layer][0][2] * level6_new_1 + normalized_betas[layer][1][1] * level6_new_2 + normalized_betas[layer][2][
+                level6_new = normalized_betas[layer][0][2] * level6_new_1 + knormalized_betas[layer][1][1] * level6_new_2 + normalized_betas[layer][2][
                     0] * level6_new_3
 
                 level12_new_1, level12_new_2 = self.cells[count](None,
@@ -416,14 +414,14 @@ class AutoFeature(nn.Module):
         result_12 = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(self.level_12[-1])))))
         result_24 = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(self.last_24(self.level_24[-1]))))))      
 
-        sum_feature_map =result_3 + result_6 + result_12 + result_24
+        sum_feature_map = result_3 + result_6 + result_12 + result_24
         return sum_feature_map
 
     def _initialize_alphas_betas(self):
-        k = sum(1 for i in range(self._step) for n in range(2 + i))
+        n_edges = sum(1 for i in range(self._step) for n in range(2 + i))
         num_ops = len(PRIMITIVES)
 
-        alphas = (1e-3 * torch.randn(k, num_ops)).clone().detach().requires_grad_(True)
+        alphas = (1e-3 * torch.randn(n_edges, num_ops)).clone().detach().requires_grad_(True)
         betas = (1e-3 * torch.randn(self._num_layers, 4, 3)).clone().detach().requires_grad_(True)
 
         self._arch_parameters = [

@@ -40,23 +40,41 @@ class AutoStereo(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-    def forward(self, x, y): 
-
+    """
+        x, y -- two transformed input frames
+        4 dims:  (1, n_channels == 3, height, width)
+    """
+    def forward(self, x, y):
         x = self.feature(x)       
         y = self.feature(y) 
 
+        """
+            Building feature-volume:
+            5 dims:
+                (1, fea_channels * 2, maxdisp / 3, height / 3, width / 3)   
+        """
         with torch.cuda.device_of(x):
-            cost = x.new().resize_(x.size()[0], x.size()[1]*2, int(self.maxdisp/3),  x.size()[2],  x.size()[3]).zero_()
+            feature_volume = x.new().resize_(x.size()[0], x.size()[1]*2, int(self.maxdisp/3),  x.size()[2],  x.size()[3]).zero_()
 
         for i in range(int(self.maxdisp/3)):
-            if i > 0 : 
-                cost[:,:x.size()[1], i,:,i:] = x[:,:,:,i:]
-                cost[:,x.size()[1]:, i,:,i:] = y[:,:,:,:-i]
+            if i > 0:
+                feature_volume[:, :x.size()[1], i, :, i:] = x[:, :, :, i:]
+                feature_volume[:, x.size()[1]:, i, :, i:] = y[:, :, :, :-i]
             else:
-                cost[:,:x.size()[1],i,:,i:] = x
-                cost[:,x.size()[1]:,i,:,i:] = y
-        
-        cost = self.matching(cost)     
-        disp0 = self.disp(cost)    
-        return disp0
+                feature_volume[:, :x.size()[1], i, :, i:] = x
+                feature_volume[:, x.size()[1]:, i, :, i:] = y
+
+        """
+            Cost-volume:
+            5 dims:
+            (1, 1, maxdisp / 3, height / 3, width / 3)
+        """
+        cost_volume = self.matching(feature_volume)
+        """
+            Disparity:
+            3 dims:
+            (1, height, width) 
+        """
+        result_disparity = self.disp(cost_volume)
+        return result_disparity
 

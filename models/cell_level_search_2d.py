@@ -2,23 +2,31 @@ import torch.nn.functional as F
 from models.operations_2d import *
 from models.genotypes_2d import PRIMITIVES
 
-class MixedOp(nn.Module):
 
-    def __init__(self, C, stride):
+class MixedOp(nn.Module):
+    def __init__(self, n_channels, stride):
         super(MixedOp, self).__init__()
         self._ops = nn.ModuleList()
         for primitive in PRIMITIVES:
-            op = OPS[primitive](C, stride)
+            op = OPS[primitive](n_channels, stride)
             if 'pool' in primitive:
-                op = nn.Sequential(op, nn.BatchNorm2d(C))
+                op = nn.Sequential(op, nn.BatchNorm2d(n_channels))
             self._ops.append(op)
 
+    """
+        x -- input data for operation
+        weights -- alphas, weights on operations
+    """
     def forward(self, x, weights):
         return sum(w * op(x) for w, op in zip(weights, self._ops))
 
 
+"""
+    steps --
+    block multiplier -- 
+    multipliers -- 
+"""
 class Cell(nn.Module):
-
     def __init__(self, steps, block_multiplier, prev_prev_fmultiplier,
                  prev_fmultiplier_down, prev_fmultiplier_same, prev_fmultiplier_up,
                  filter_multiplier):
@@ -77,8 +85,18 @@ class Cell(nn.Module):
 
         return F.interpolate(prev_feature, (feature_size_h, feature_size_w), mode='bilinear', align_corners=True)
 
-    def forward(self, s0, s1_down, s1_same, s1_up, n_alphas):
-
+    """
+        Most likely:
+            s0 -- output from cell on same resolution, layer - 2
+            s1_down, same, up -- outputs from layer - 1
+            alphas -- array for alphas in all edges in cell
+        Input dimensions:
+            0: 1
+            1: n_channels
+            2: height
+            3: width
+    """
+    def forward(self, s0, s1_down, s1_same, s1_up, alphas):
         if s1_down is not None:
             s1_down = self.prev_feature_resize(s1_down, 'down')
             s1_down = self.preprocess_down(s1_down)
@@ -91,10 +109,11 @@ class Cell(nn.Module):
             s1_up = self.preprocess_up(s1_up)
             size_h, size_w = s1_up.shape[2], s1_up.shape[3]
         all_states = []
-        if s0 is not None:
 
+        if s0 is not None:
             s0 = F.interpolate(s0, (size_h, size_w), mode='bilinear', align_corners=True) if (s0.shape[2] != size_h) or (s0.shape[3] != size_w) else s0
             s0 = self.pre_preprocess(s0) if (s0.shape[1] != self.C_out) else s0
+
             if s1_down is not None:
                 states_down = [s0, s1_down]
                 all_states.append(states_down)
@@ -124,7 +143,7 @@ class Cell(nn.Module):
                     branch_index = offset + j
                     if self._ops[branch_index] is None:
                         continue
-                    new_state = self._ops[branch_index](h, n_alphas[branch_index])                
+                    new_state = self._ops[branch_index](h, alphas[branch_index])
                     new_states.append(new_state)
 
                 s = sum(new_states)
@@ -134,7 +153,6 @@ class Cell(nn.Module):
             concat_feature = torch.cat(states[-self.block_multiplier:], dim=1)
             final_concates.append(concat_feature)
         return final_concates
-
 
     def _initialize_weights(self):
         for m in self.modules():
