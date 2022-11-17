@@ -53,6 +53,7 @@ class ConvBR(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
+
 class SepConv(nn.Module):
     def __init__(self, C_in, C_out, kernel_size, stride, padding):
         super(SepConv, self).__init__()
@@ -79,6 +80,7 @@ class SepConv(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
+
 
 class Identity(nn.Module):
     def __init__(self):
@@ -158,6 +160,7 @@ class DoubleFactorizedReduce(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
+
 class FactorizedIncrease(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(FactorizedIncrease, self).__init__()
@@ -210,5 +213,3 @@ class DoubleFactorizedIncrease(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-
-
