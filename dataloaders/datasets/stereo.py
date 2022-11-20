@@ -1,3 +1,4 @@
+import os
 import torch.utils.data as data
 from PIL import Image
 import numpy as np
@@ -8,6 +9,49 @@ from .satellite import load_data_satellite
 
 
 def load_data_sceneflow(data_path, current_file):
+    """
+    Data layout:
+        disparity
+            *scene_name*
+                left
+                    *.png
+                right
+                    *.png
+        frames_finalpass
+            -*- same -*-
+            png -> pfm
+
+    Input:
+        path of the format: frames_finalpass/*scene_name*/left/*sample_name*.png
+    """
+    frames_prefix = 'frames_finalpass'
+    disp_prefix = 'disparity'
+
+    scene_name = current_file.split('/', maxsplit=1)[1].rsplit('/', maxsplit=2)[0]
+    sample_name = current_file.rsplit('/', maxsplit=1)[1].split('.')[0]
+
+    left = Image.open(os.path.join(data_path, frames_prefix, scene_name, "left", f"{sample_name}.png"))
+    right = Image.open(os.path.join(data_path, frames_prefix, scene_name, "right", f"{sample_name}.png"))
+
+    disp_left, height, width = read_pfm(os.path.join(data_path, disp_prefix, scene_name, "left", f"{sample_name}.pfm"))
+    disp_right, height, width = read_pfm(os.path.join(data_path, disp_prefix, scene_name, "right", f"{sample_name}.pfm"))
+
+    size = np.shape(left)
+    height = size[0]
+    width = size[1]
+    temp_data = np.zeros([8, height, width], 'float32')
+    left = np.asarray(left)
+    right = np.asarray(right)
+
+    set_rgb_layers(temp_data, left, right)
+
+    temp_data[6: 7, :, :] = width * 2
+    temp_data[6, :, :] = disp_left
+    temp_data[7, :, :] = disp_right
+    return temp_data
+
+
+def load_data_sceneflow_old(data_path, current_file):
     """
     Data layout:
         disparity
