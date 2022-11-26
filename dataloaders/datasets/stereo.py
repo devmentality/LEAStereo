@@ -1,7 +1,4 @@
 import torch.utils.data as data
-import skimage
-import skimage.io
-import skimage.transform
 from PIL import Image
 import numpy as np
 import random
