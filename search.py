@@ -12,8 +12,6 @@ from utils.summaries import TensorboardSummary
 from utils.copy_state_dict import copy_state_dict
 from torch.autograd import Variable
 from time import time
-import imageio
-import apex
 import torch.nn.functional as F
 import pdb
 from config_utils.search_args import obtain_search_args
