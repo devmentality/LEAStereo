@@ -204,9 +204,9 @@ class Trainer(object):
                 self.writer.add_scalar('train/total_loss_iter', loss.item(), i + num_img_tr * epoch)
 
             #Show 10 * 3 inference results each epoch
-            if i % (num_img_tr // 10) == 0:
-                global_step = i + num_img_tr * epoch
-                self.summary.visualize_image_stereo(self.writer, input1, target, output, global_step)
+            # if i % (num_img_tr // 10) == 0:
+            #     global_step = i + num_img_tr * epoch
+            #     self.summary.visualize_image_stereo(self.writer, input1, target, output, global_step)
 
         self.writer.add_scalar('train/total_loss_epoch', train_loss, epoch)
         print("=== Train ===> Epoch :{} Error: {:.4f}".format(epoch, train_loss/valid_iteration))
