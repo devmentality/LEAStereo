@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import os.path
+import sys
 from .common import set_rgb_layers
 
 
@@ -24,7 +25,7 @@ def load_data_new_tagil(data_path, current_file):
     disp_right = read_disparity_image(disp_right_name)
 
     height, width = left.shape
-    left = np.array([left, left, left])
+    left = np.transpose(np.array([left, left, left]))
     right = np.array([right, right, right])
 
     print(f'Loaded sample from {current_file}, size {height} x {width}')
@@ -40,12 +41,10 @@ def load_data_new_tagil(data_path, current_file):
 
 
 def test_reading():
-    file_name = input()
-    data = read_disparity_image(file_name)
-    print(f'Transformed shape {data.shape}')
-    n_all = data.shape[0] * data.shape[1]
-    n_noocclusions = np.count_nonzero(data)
-    print(f'Occluded {n_all - n_noocclusions} of {n_all} pixels')
+    data_path = sys.argv[1]
+    curr_file = sys.argv[2]
+    data = load_data_new_tagil(data_path, curr_file)
+    print("Done")
 
 
 if __name__ == "__main__":
