@@ -6,6 +6,7 @@ from mypath import Path
 import pdb
 from .common import read_pfm, set_rgb_layers, train_transform, test_transform
 from .satellite import load_data_satellite
+from .new_tagil import load_data_new_tagil
 
 
 def load_data_sceneflow(data_path, current_file):
@@ -142,6 +143,8 @@ class DatasetFromList(data.Dataset):
             temp_data = load_data_satellite(Path.db_root_dir('satellite'), curr_file)
         elif self.args.dataset == 'dfc2019':
             temp_data = load_data_dfc2019(Path.db_root_dir('dfc2019'), curr_file)
+        elif self.args.dataset == 'new_tagil':
+            temp_data = load_data_new_tagil(Path.db_root_dir('new_tagil'), curr_file)
 
         if self.training:
             input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)
