@@ -20,6 +20,7 @@ def obtain_evaluation_args():
     parser.add_argument('--middlebury', type=int, default=0, help='Middlebury? Default=False')
     parser.add_argument('--satellite', type=int, default=0, help='Satellite? Default=False')
     parser.add_argument('--dfc2019', type=int, default=0, help='DFC2019?')
+    parser.add_argument('--new_tagil', type=int, default=0, help='New Tagil?')
 
     add_leastereo_args(parser)
 

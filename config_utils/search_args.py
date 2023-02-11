@@ -7,7 +7,7 @@ def obtain_search_args():
     parser = argparse.ArgumentParser(description="LEStereo Searching...")
     parser.add_argument('--clean-module', type=int, default=0)
     parser.add_argument('--dataset', type=str, default='sceneflow',
-                        choices=['sceneflow', 'satellite'],
+                        choices=['sceneflow', 'satellite', 'new_tagil'],
                         help='dataset name (default: sceneflow)')
     parser.add_argument('--listset', type=str, required=True,
                         help='Path to lists under dataloaders/lists subfolder')

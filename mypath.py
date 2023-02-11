@@ -15,6 +15,8 @@ class Path(object):
             return './dataset/l2d_ntagil_20220319/'
         elif dataset == 'dfc2019':
             return './dataset/dfc2019/'
+        elif dataset == 'new_tagil':
+            return './dataset/new_tagil/'
         else:
             print('Dataset {} not available.'.format(dataset))
             raise NotImplementedError

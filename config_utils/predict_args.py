@@ -19,6 +19,7 @@ def obtain_predict_args():
     parser.add_argument('--middlebury', type=int, default=0, help='Middlebury? Default=False')
     parser.add_argument('--satellite', type=int, default=0, help='Satellite? Default=False')
     parser.add_argument('--mvs3d', type=int, default=0, help='MVS3D? Default=False')
+    parser.add_argument('--new_tagil', type=int, default=0, help='New Tagil?')
 
     add_leastereo_args(parser)
 

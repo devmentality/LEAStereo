@@ -1,4 +1,4 @@
-if [ "$#" -ne 1 ]; then
+  if [ "$#" -ne 1 ]; then
     echo "Provide experiment name"
 fi
 

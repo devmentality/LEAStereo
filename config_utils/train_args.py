@@ -36,7 +36,7 @@ def obtain_train_args():
                         help='epochs at which learning rate is divided by 2')    
     parser.add_argument('--stage', type=str, default='train', choices=['search', 'train'])
     parser.add_argument('--dataset', type=str, default='sceneflow', 
-                        choices=['sceneflow', 'kitti15', 'kitti12', 'middlebury', 'sceneflow_part', 'satellite', 'dfc2019'],
+                        choices=['sceneflow', 'satellite', 'dfc2019', 'new_tagil'],
                         help='dataset name')
     parser.add_argument('--experiment', type=str, default='default', help='Experiment name')
     parser.add_argument('--listset', type=str, required=True,
