@@ -23,7 +23,9 @@ def load_data_new_tagil(data_path, current_file):
     disp_left = read_disparity_image(disp_left_name)
     disp_right = read_disparity_image(disp_right_name)
 
-    height, width, _ = left.shape
+    height, width = left.shape
+    left = np.array([left, left, left])
+    right = np.array([right, right, right])
 
     print(f'Loaded sample from {current_file}, size {height} x {width}')
 
