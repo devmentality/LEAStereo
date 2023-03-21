@@ -16,7 +16,7 @@ from utils.multadds_count import count_parameters_in_MB, comp_multadds
 from utils.metrics import calculate_3px_error_and_correct_mask
 from retrain.LEAStereo import LEAStereo
 from config_utils.evaluation_args import obtain_evaluation_args
-from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite
+from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite, load_data_new_tagil
 
 opt = obtain_evaluation_args()
 
@@ -181,7 +181,18 @@ def main():
             leftname = file_path + current_file + '/satiml.png'
             in_savename = opt.save_path + current_file + '_in.png'
             error_savename = opt.save_path + current_file + '_error.png'
+        elif opt.new_tagil:
+            print(f"Running for new tagil {current_file}")
+            data = load_data_new_tagil(file_path, current_file)
+            left = data[0:3, :, :]
+            right = data[3: 6, :, :]
+            disp = data[6, :, :]
 
+            savename = opt.save_path + current_file + '.png'
+
+            leftname = os.path.join(file_path, current_file, 'img_L.tif')
+            in_savename = opt.save_path + current_file + '_in.png'
+            error_savename = opt.save_path + current_file + '_error.png'
         else:
             raise Exception("Unsupported dataset")
 
