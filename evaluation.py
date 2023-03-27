@@ -75,6 +75,11 @@ def crop_image(image, crop_height, crop_width):
     return result
 
 
+def crop_image_grayscale(image, crop_height, crop_width):
+    data = np.asarray(image)
+    return crop_array_grayscale(data, crop_height, crop_width)
+
+
 def crop_array_grayscale(data, crop_height, crop_width):
     h, w = np.shape(data)
 
@@ -202,8 +207,7 @@ def main():
             error_savename = opt.save_path + current_file + '_error.png'
 
             leftsave = Image.open(leftname)
-            leftsave = np.array([leftsave, leftsave, leftsave])
-            leftsave = crop_image(leftsave, opt.crop_height, opt.crop_width)
+            leftsave = crop_image_grayscale(leftsave, opt.crop_height, opt.crop_width)
             skimage.io.imsave(in_savename, leftsave)
         else:
             raise Exception("Unsupported dataset")
