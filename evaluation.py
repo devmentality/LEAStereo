@@ -169,6 +169,9 @@ def main():
             in_savename = opt.save_path + sample_name + '_in.png'
             error_savename = opt.save_path + sample_name + '_error.png'
 
+            leftsave = Image.open(leftname)
+            leftsave = crop_image(leftsave, opt.crop_height, opt.crop_width)
+            skimage.io.imsave(in_savename, leftsave)
         elif opt.satellite:
             print(f"Running for satellite {current_file}")
             data = load_data_satellite(file_path, current_file)
@@ -181,6 +184,10 @@ def main():
             leftname = file_path + current_file + '/satiml.png'
             in_savename = opt.save_path + current_file + '_in.png'
             error_savename = opt.save_path + current_file + '_error.png'
+
+            leftsave = Image.open(leftname)
+            leftsave = crop_image(leftsave, opt.crop_height, opt.crop_width)
+            skimage.io.imsave(in_savename, leftsave)
         elif opt.new_tagil:
             print(f"Running for new tagil {current_file}")
             data = load_data_new_tagil(file_path, current_file)
@@ -193,6 +200,11 @@ def main():
             leftname = os.path.join(file_path, current_file, 'img_L.tif')
             in_savename = opt.save_path + current_file + '_in.png'
             error_savename = opt.save_path + current_file + '_error.png'
+
+            leftsave = Image.open(leftname)
+            leftsave = np.array([leftsave, leftsave, leftsave])
+            leftsave = crop_image(leftsave, opt.crop_height, opt.crop_width)
+            skimage.io.imsave(in_savename, leftsave)
         else:
             raise Exception("Unsupported dataset")
 
@@ -212,9 +224,6 @@ def main():
         print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error}")
 
         skimage.io.imsave(savename, prediction)
-        left = Image.open(leftname)
-        left = crop_image(left, opt.crop_height, opt.crop_width)
-        skimage.io.imsave(in_savename, left)
 
         error_image = make_error_image_array(prediction, ~correct & mask)
         skimage.io.imsave(error_savename, error_image)
