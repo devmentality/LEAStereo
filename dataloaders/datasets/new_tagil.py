@@ -16,8 +16,8 @@ def read_disparity_image(file_name: str) -> np.ndarray:
 def load_data_new_tagil(data_path, current_file):
     left_name = os.path.join(data_path, current_file, 'img_L.tif')
     right_name = os.path.join(data_path, current_file, 'img_R.tif')
-    disp_left_name = os.path.join(data_path, current_file, 'disp_L.tif')
-    disp_right_name = os.path.join(data_path, current_file, 'disp_R.tif')
+    disp_left_name = os.path.join(data_path, current_file, 'disp_L_lidar.tif')
+    disp_right_name = os.path.join(data_path, current_file, 'disp_R_lidar.tif')
 
     left = np.asarray(Image.open(left_name))
     right = np.asarray(Image.open(right_name))

@@ -24,12 +24,17 @@ def main(args):
 
     for d in dirs:
         im_path = os.path.join(d.path, 'img_L.tif')
-        disp_path = os.path.join(d.path, 'disp_L.tif')
+        disp_path = os.path.join(d.path, 'disp_L_lidar.tif')
+        disp0_path = os.path.join(d.path, 'disp_L_lidar0.tif')
+
         im_render_path = os.path.join(args.out_dir,  f'{d.name}_render_L.jpeg')
-        disp_render_path = os.path.join(args.out_dir, f'{d.name}_render_disp_L.jpeg')
+        disp_render_path = os.path.join(args.out_dir, f'{d.name}_render_disp_L_lidar.jpeg')
+        disp0_render_path = os.path.join(args.out_dir, f'{d.name}_render_disp_L_lidar0.jpeg')
 
         render_image(im_path, im_render_path)
         render_disp(disp_path, disp_render_path)
+        render_disp(disp0_path, disp0_render_path)
+
         print(f'Rendered in {d.name}')
 
 

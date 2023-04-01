@@ -7,14 +7,17 @@ parser.add_argument("--in_dir", type=str, help="source dataset dir")
 parser.add_argument("--out_dir", type=str, help="destination dataset dir")
 
 
-def main(args):
-    required = {
-        'img_L.tif',
-        'img_R.tif',
-        'disp_L.tif',
-        'disp_R.tif'
-    }
+required = {
+    'img_L.tif',
+    'img_R.tif',
+    'disp_L_lidar.tif',
+    'disp_R_lidar.tif',
+    'disp_L_lidar0.tif',
+    'disp_R_lidar0.tif'
+}
 
+
+def main(args):
     os.mkdir(args.out_dir)
     dirs = [d for d in os.scandir(args.in_dir) if d.is_dir()]
     for d in dirs:
