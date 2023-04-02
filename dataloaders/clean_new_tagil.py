@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 
 import numpy as np
@@ -40,7 +41,8 @@ def is_disp_valid(path: str) -> bool:
 
 def main(args):
     dirs = [d for d in os.scandir(args.dir) if d.is_dir()]
-    for d in dirs:
+    for i in range(len(dirs)):
+        d = dirs[i]
         is_valid = (
             is_img_valid(os.path.join(d, 'img_L.tif')) and
             is_img_valid(os.path.join(d, 'img_R.tif')) and
@@ -52,6 +54,9 @@ def main(args):
             shutil.move(d, os.path.join(args.dir, f'.{d.name}'))
         elif not is_valid:
             print(f'invalid sample {d.name}. dry run')
+
+        if i % 100 == 0:
+            print(f"Handled {i} of {len(dirs)}", file=sys.stderr)
 
 
 if __name__ == "__main__":
