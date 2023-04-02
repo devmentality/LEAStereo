@@ -37,7 +37,11 @@ def save_list(lists_dir: str, list_name: str, names: List[str]):
 def build_lists(dataset_dir: str, lists_dir: str):
     os.mkdir(lists_dir)
 
-    sample_names = next(os.walk(dataset_dir))[1]
+    sample_names = [
+        name
+        for name in next(os.walk(dataset_dir))[1]
+        if not name.startswith('.')
+    ]
     random.shuffle(sample_names)
 
     ranges = make_ranges([
