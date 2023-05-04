@@ -47,10 +47,15 @@ def load_data_whu(data_path, current_file):
 
     temp_data = np.zeros([8, height, width], 'float32')
 
+    # swap images because...
+    tmp = left
+    left = right
+    right = tmp
     set_rgb_layers(temp_data, left, right)
 
-    temp_data[6, :, :] = disp_left
-    temp_data[7, :, :] = 2 * width
+    # set right disparity instead
+    temp_data[6, :, :] = 2 * width
+    temp_data[7, :, :] = disp_left
 
     return temp_data
 

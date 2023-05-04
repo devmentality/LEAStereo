@@ -226,7 +226,7 @@ def main():
             data = load_data_whu(file_path, current_file)
             left = data[0:3, :, :]
             right = data[3: 6, :, :]
-            disp = data[6, :, :]
+            disp = data[7, :, :]
 
             savename = opt.save_path + current_file + '.png'
 
