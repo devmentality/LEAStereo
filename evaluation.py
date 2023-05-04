@@ -16,7 +16,7 @@ from utils.multadds_count import count_parameters_in_MB, comp_multadds
 from utils.metrics import calculate_3px_error_and_correct_mask
 from retrain.LEAStereo import LEAStereo
 from config_utils.evaluation_args import obtain_evaluation_args
-from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite, load_data_new_tagil
+from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite, load_data_new_tagil, load_data_whu
 
 opt = obtain_evaluation_args()
 
@@ -106,6 +106,16 @@ def crop_array(data, crop_height, crop_width):
         result = data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
 
     return result
+
+
+def scale_for_render(in_arr, new_min, new_max):
+    in_min = np.min(in_arr)
+    in_rng = np.max(in_arr) - np.min(in_arr)
+
+    new_rng = new_max - new_min
+
+    new_arr = (in_arr.astype(float) - in_min) * new_rng / in_rng + new_min
+    return new_arr.astype(np.uint8)
 
 
 def make_error_image_array(prediction, error_mask):
@@ -203,11 +213,31 @@ def main():
             savename = opt.save_path + current_file + '.png'
 
             leftname = os.path.join(file_path, current_file, 'img_L.tif')
-            in_savename = opt.save_path + current_file + '_in.png'
+            in_savename = opt.save_path + current_file + '_in_render.png'
             error_savename = opt.save_path + current_file + '_error.png'
 
             leftsave = Image.open(leftname)
             leftsave = crop_image_grayscale(leftsave, opt.crop_height, opt.crop_width)
+            leftsave = scale_for_render(leftsave, 30, 200)
+
+            skimage.io.imsave(in_savename, leftsave)
+        elif opt.whu:
+            print(f"Running for WHU {current_file}")
+            data = load_data_whu(file_path, current_file)
+            left = data[0:3, :, :]
+            right = data[3: 6, :, :]
+            disp = data[6, :, :]
+
+            savename = opt.save_path + current_file + '.png'
+
+            leftname = os.path.join(file_path, current_file, 'left.tiff')
+            in_savename = opt.save_path + current_file + '_in_render.png'
+            error_savename = opt.save_path + current_file + '_error.png'
+
+            leftsave = Image.open(leftname)
+            leftsave = crop_image_grayscale(leftsave, opt.crop_height, opt.crop_width)
+            leftsave = scale_for_render(leftsave, 30, 200)
+
             skimage.io.imsave(in_savename, leftsave)
         else:
             raise Exception("Unsupported dataset")
