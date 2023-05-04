@@ -34,6 +34,9 @@ def load_data_whu(data_path, current_file):
     left_name = os.path.join(data_path, current_file, 'left.tiff')
     right_name = os.path.join(data_path, current_file, 'right.tiff')
     disp_left_name = os.path.join(data_path, current_file, 'disp_L.tiff')
+    
+    # swap images because we expect objects to move from right to left...
+    left_name, right_name = right_name, left_name
 
     left = read_left_image(left_name)
     right = read_right_image(right_name)
@@ -47,10 +50,6 @@ def load_data_whu(data_path, current_file):
 
     temp_data = np.zeros([8, height, width], 'float32')
 
-    # swap images because...
-    tmp = left
-    left = right
-    right = tmp
     set_rgb_layers(temp_data, left, right)
 
     # set right disparity instead
