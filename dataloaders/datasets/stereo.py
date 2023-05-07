@@ -152,10 +152,16 @@ class DatasetFromList(data.Dataset):
             temp_data = load_data_whu(Path.db_root_dir('whu'), curr_file)
 
         if self.training:
-            input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift, use_left=use_left)
+            input1, input2, target = train_transform(
+                temp_data, self.crop_height, self.crop_width, 
+                use_left=use_left, 
+                left_right=self.left_right, 
+                shift=self.shift)
             return input1, input2, target
         else:
-            input1, input2, target = test_transform(temp_data, self.crop_height, self.crop_width, use_left=use_left)
+            input1, input2, target = test_transform(
+                temp_data, self.crop_height, self.crop_width, 
+                use_left=use_left)
             return input1, input2, target
 
     def __len__(self):
