@@ -40,7 +40,7 @@ def read_pfm(file):
     return img, height, width
 
 
-def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=0):
+def train_transform(temp_data, crop_height, crop_width, use_left=True, left_right=False, shift=0):
     _, h, w = np.shape(temp_data)
 
     if h > crop_height and w <= crop_width:
@@ -76,19 +76,22 @@ def train_transform(temp_data, crop_height, crop_width, left_right=False, shift=
         start_x = random.randint(0, w - crop_width)
         start_y = random.randint(0, h - crop_height)
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
-    if random.randint(0, 1) == 0 and left_right:
+
+    if use_left or (random.randint(0, 1) == 0 and left_right):
+        # use left disp
         right = temp_data[0: 3, :, :]
         left = temp_data[3: 6, :, :]
-        target = temp_data[7: 8, :, :]
-        return left, right, target
-    else:
-        left = temp_data[0: 3, :, :]
-        right = temp_data[3: 6, :, :]
         target = temp_data[6: 7, :, :]
         return left, right, target
+    else:
+        # use right
+        left = temp_data[0: 3, :, :]
+        right = temp_data[3: 6, :, :]
+        target = temp_data[7: 8, :, :]
+        return left, right, target
 
 
-def test_transform(temp_data, crop_height, crop_width, left_right=False):
+def test_transform(temp_data, crop_height, crop_width, use_left=True, left_right=False):
     _, h, w = np.shape(temp_data)
 
     if h <= crop_height and w <= crop_width:
@@ -101,9 +104,14 @@ def test_transform(temp_data, crop_height, crop_width, left_right=False):
         start_y = (h - crop_height) // 2
         temp_data = temp_data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
 
-    left = temp_data[0: 3, :, :]
-    right = temp_data[3: 6, :, :]
-    target = temp_data[6: 7, :, :]
+    if use_left:
+        left = temp_data[0: 3, :, :]
+        right = temp_data[3: 6, :, :]
+        target = temp_data[6: 7, :, :]
+    else:
+        left = temp_data[0: 3, :, :]
+        right = temp_data[3: 6, :, :]
+        target = temp_data[7: 8, :, :]
 
     return left, right, target
 

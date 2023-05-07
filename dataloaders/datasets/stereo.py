@@ -135,7 +135,8 @@ class DatasetFromList(data.Dataset):
 
     def __getitem__(self, index):
         curr_file = self.file_list[index].rstrip()
-
+        # which disparity to use
+        use_left = True
         if self.args.dataset == 'sceneflow':
             temp_data = load_data_sceneflow(Path.db_root_dir('sceneflow'), curr_file)
         elif self.args.dataset == 'sceneflow_part':
@@ -147,13 +148,14 @@ class DatasetFromList(data.Dataset):
         elif self.args.dataset == 'new_tagil':
             temp_data = load_data_new_tagil(Path.db_root_dir('new_tagil'), curr_file)
         elif self.args.dataset == 'whu':
+            use_left = False
             temp_data = load_data_whu(Path.db_root_dir('whu'), curr_file)
 
         if self.training:
-            input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift)
+            input1, input2, target = train_transform(temp_data, self.crop_height, self.crop_width, self.left_right, self.shift, use_left=use_left)
             return input1, input2, target
         else:
-            input1, input2, target = test_transform(temp_data, self.crop_height, self.crop_width)
+            input1, input2, target = test_transform(temp_data, self.crop_height, self.crop_width, use_left=use_left)
             return input1, input2, target
 
     def __len__(self):
