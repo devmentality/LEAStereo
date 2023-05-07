@@ -31,6 +31,8 @@ def read_disparity_image(file_name: str) -> np.ndarray:
 
 
 def load_data_whu(data_path, current_file):
+    print(f'Loading sample from {current_file}')
+
     left_name = os.path.join(data_path, current_file, 'left.tiff')
     right_name = os.path.join(data_path, current_file, 'right.tiff')
     disp_left_name = os.path.join(data_path, current_file, 'disp_L.tiff')
@@ -46,7 +48,6 @@ def load_data_whu(data_path, current_file):
     left = np.transpose(np.array([left, left, left]), (1, 2, 0))
     right = np.transpose(np.array([right, right, right]), (1, 2, 0))
 
-    print(f'Loaded sample from {current_file}, size {height} x {width}')
 
     temp_data = np.zeros([8, height, width], 'float32')
 
