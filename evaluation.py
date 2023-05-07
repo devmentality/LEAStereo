@@ -237,7 +237,11 @@ def main():
             skimage.io.imsave(r_savename, rightsave)
         elif opt.whu:
             print(f"Running for WHU {current_file}")
-            data = load_data_whu(file_path, current_file)
+            try:
+                data = load_data_whu(file_path, current_file)
+            except Exception:
+                print(f'Exception loading {current_file}')
+                continue
             left = data[0:3, :, :]
             right = data[3: 6, :, :]
             disp = data[7, :, :]
