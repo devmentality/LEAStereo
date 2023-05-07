@@ -118,6 +118,18 @@ def scale_for_render(in_arr, new_min, new_max):
     return new_arr.astype(np.uint8)
 
 
+def scale_disp_for_render(in_arr, new_min, new_max):
+    in_min = np.nanmin(in_arr)
+    in_rng = np.nanmax(in_arr) - np.nanmin(in_arr)
+
+    new_rng = new_max - new_min
+
+    new_arr = (in_arr - in_min) * new_rng / in_rng + new_min
+    new_arr[np.isnan(new_arr)] = 0
+    
+    return new_arr
+
+
 def make_error_image_array(prediction, error_mask):
     h, w = np.shape(prediction)
     error_layers = np.zeros((3, h, w))
@@ -182,7 +194,6 @@ def main():
 
             leftname = file_path + current_file + '_LEFT_RGB.tif'
             in_savename = opt.save_path + sample_name + '_in.png'
-            error_savename = opt.save_path + sample_name + '_error.png'
 
             leftsave = Image.open(leftname)
             leftsave = crop_image(leftsave, opt.crop_height, opt.crop_width)
@@ -198,7 +209,6 @@ def main():
 
             leftname = file_path + current_file + '/satiml.png'
             in_savename = opt.save_path + current_file + '_in.png'
-            error_savename = opt.save_path + current_file + '_error.png'
 
             leftsave = Image.open(leftname)
             leftsave = crop_image(leftsave, opt.crop_height, opt.crop_width)
@@ -212,15 +222,19 @@ def main():
 
             savename = opt.save_path + current_file + '.png'
 
+            l_savename = opt.save_path + current_file + '_L_render.png'                
             leftname = os.path.join(file_path, current_file, 'img_L.tif')
-            in_savename = opt.save_path + current_file + '_in_render.png'
-            error_savename = opt.save_path + current_file + '_error.png'
-
             leftsave = Image.open(leftname)
             leftsave = crop_image_grayscale(leftsave, opt.crop_height, opt.crop_width)
             leftsave = scale_for_render(leftsave, 30, 200)
+            skimage.io.imsave(l_savename, leftsave)
 
-            skimage.io.imsave(in_savename, leftsave)
+            r_savename = opt.save_path + current_file + '_R_render.png'                
+            rightname = os.path.join(file_path, current_file, 'img_R.tif')
+            rightsave = Image.open(rightname)
+            rightsave = crop_image_grayscale(rightsave, opt.crop_height, opt.crop_width)
+            rightsave = scale_for_render(rightsave, 30, 200)
+            skimage.io.imsave(r_savename, rightsave)
         elif opt.whu:
             print(f"Running for WHU {current_file}")
             data = load_data_whu(file_path, current_file)
@@ -255,10 +269,15 @@ def main():
         three_px_error, correct = calculate_3px_error_and_correct_mask(predicted_disparity, true_disparity, opt.maxdisp)
         three_px_error_all += three_px_error
 
-        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error}")
+        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}")
 
         skimage.io.imsave(savename, prediction)
 
+        ground_truth_name = opt.save_path + current_file + '_gt.png'
+        gt_arr = disp.astype(np.uint8)
+        skimage.io.imsave(ground_truth_name, gt_arr)
+
+        error_savename = opt.save_path + current_file + f'_error_{three_px_error}.png'
         error_image = make_error_image_array(prediction, ~correct & mask)
         skimage.io.imsave(error_savename, error_image)
 
