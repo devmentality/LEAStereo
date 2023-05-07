@@ -25,7 +25,7 @@ def sample_name(left_name: str) -> str:
 def make_list(files_dir: str) -> List[str]:
     return [
         sample_name(name)
-        for name in next(os.walk(files_dir))[1]
+        for name in next(os.walk(files_dir))[2]
         if not name.startswith('.')
     ]
 
