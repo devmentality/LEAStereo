@@ -41,6 +41,8 @@ def obtain_train_args():
     parser.add_argument('--experiment', type=str, default='default', help='Experiment name')
     parser.add_argument('--listset', type=str, required=True,
                         help='Path to lists under dataloaders/lists subfolder')
+    parser.add_argument('--edge_loss_w', type=float, default=0.2, 
+                        help='weight of edge-aware loss [0-1]')
 
     add_leastereo_args(parser)
 

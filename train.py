@@ -17,6 +17,7 @@ from utils.early_stopping import EarlyStopping
 from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
 from utils.metrics import calculate_3px_error
+from edge_detection.edge_detection import gradient_aware_loss
 
 opt = obtain_train_args()
 print(opt)
@@ -89,6 +90,15 @@ val_step = 0
 train_step = 0
 
 
+def combined_loss(predict, target, mask, grad_loss_w):
+    direct_loss = F.smooth_l1_loss(predict[mask], target[mask], reduction='mean')
+    grad_loss = gradient_aware_loss(predict, target)
+    comb_loss = direct_loss * (1 - grad_loss_w) + grad_loss * grad_loss_w 
+
+    print(f'Direct loss: {direct_loss.item()}, Gradient loss: {grad_loss.item()}, Combined loss: {comb_loss.item()}')
+    return combined_loss
+
+
 def calculate_validity_mask(target):
     # Zeros in target are occlusions
     return (target < opt.maxdisp) & (target > 0.001)
@@ -118,7 +128,8 @@ def train(epoch):
     
             optimizer.zero_grad()
             disp = model(input1, input2)
-            loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
+            #loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
+            loss = combined_loss(disp, target, mask, opt.edge_loss_w)
             loss.backward()
             optimizer.step()
             
