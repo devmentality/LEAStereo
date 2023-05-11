@@ -34,7 +34,7 @@ def y_grad(t_arr: torch.Tensor, device) -> torch.Tensor:
         [1, 2, 1],
         [0, 0, 0],
         [-1, -2, -1]
-    ], device=device)
+    ]).to(device=device)
 
     t_y_kernel = torch.unsqueeze(torch.unsqueeze(t_y_kernel, dim=0), dim=0)
     t_arr = torch.unsqueeze(t_arr, dim=1).float()
@@ -48,7 +48,7 @@ def x_grad(t_arr: torch.Tensor, device) -> torch.Tensor:
         [-1, 0, 1],
         [-2, 0, 2],
         [-1, 0, 1]
-    ], device=device)
+    ]).to(device=device)
 
     t_x_kernel = torch.unsqueeze(torch.unsqueeze(t_x_kernel, dim=0), dim=0)
     t_arr = torch.unsqueeze(t_arr, dim=1).float()
