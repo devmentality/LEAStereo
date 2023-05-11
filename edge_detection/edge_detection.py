@@ -29,12 +29,12 @@ def make_disp_edges(disp_arr: np.ndarray) -> np.ndarray:
     return cv2.dilate(edges, kernel, iterations=1)
 
 
-def y_grad(t_arr: torch.Tensor) -> torch.Tensor:
+def y_grad(t_arr: torch.Tensor, device) -> torch.Tensor:
     t_y_kernel = torch.Tensor([
         [1, 2, 1],
         [0, 0, 0],
         [-1, -2, -1]
-    ])
+    ], device=device)
 
     t_y_kernel = torch.unsqueeze(torch.unsqueeze(t_y_kernel, dim=0), dim=0)
     t_arr = torch.unsqueeze(t_arr, dim=1).float()
@@ -43,12 +43,12 @@ def y_grad(t_arr: torch.Tensor) -> torch.Tensor:
     return t_y_grad 
 
 
-def x_grad(t_arr: torch.Tensor) -> torch.Tensor:
+def x_grad(t_arr: torch.Tensor, device) -> torch.Tensor:
     t_x_kernel = torch.Tensor([
         [-1, 0, 1],
         [-2, 0, 2],
         [-1, 0, 1]
-    ])
+    ], device=device)
 
     t_x_kernel = torch.unsqueeze(torch.unsqueeze(t_x_kernel, dim=0), dim=0)
     t_arr = torch.unsqueeze(t_arr, dim=1).float()
@@ -59,7 +59,7 @@ def x_grad(t_arr: torch.Tensor) -> torch.Tensor:
 
 def gradient_aware_loss(output, target, device):
     target = torch.from_numpy(make_smoother_disp(target.cpu().numpy())).to(device=device)
-    out_x, out_y = x_grad(output), y_grad(output)
-    t_x, t_y = x_grad(target), y_grad(target)
+    out_x, out_y = x_grad(output, device), y_grad(output, device)
+    t_x, t_y = x_grad(target, device), y_grad(target, device)
 
     return F.smooth_l1_loss(out_x, t_x, reduction='mean') + F.smooth_l1_loss(out_y, t_y, reduction='mean')
