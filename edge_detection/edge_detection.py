@@ -37,8 +37,9 @@ def y_grad(t_arr: torch.Tensor) -> torch.Tensor:
     ])
 
     t_y_kernel = torch.unsqueeze(torch.unsqueeze(t_y_kernel, dim=0), dim=0)
+    t_arr = torch.unsqueeze(t_arr, dim=1).float()
 
-    t_y_grad = F.conv2d(t_arr.float(), t_y_kernel)
+    t_y_grad = F.conv2d(t_arr, t_y_kernel)
     return t_y_grad 
 
 
@@ -50,8 +51,9 @@ def x_grad(t_arr: torch.Tensor) -> torch.Tensor:
     ])
 
     t_x_kernel = torch.unsqueeze(torch.unsqueeze(t_x_kernel, dim=0), dim=0)
+    t_arr = torch.unsqueeze(t_arr, dim=1).float()
 
-    t_x_grad = F.conv2d(t_arr.float(), t_x_kernel)
+    t_x_grad = F.conv2d(t_arr, t_x_kernel)
     return t_x_grad 
 
 
