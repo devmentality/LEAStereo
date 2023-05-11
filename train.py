@@ -92,7 +92,7 @@ train_step = 0
 
 def combined_loss(predict, target, mask, grad_loss_w):
     direct_loss = F.smooth_l1_loss(predict[mask], target[mask], reduction='mean')
-    grad_loss = gradient_aware_loss(predict, target)
+    grad_loss = gradient_aware_loss(predict, target, device=device)
     comb_loss = direct_loss + grad_loss * grad_loss_w 
 
     print(f'Direct loss: {direct_loss.item()}, Gradient loss: {grad_loss.item()}, Combined loss: {comb_loss.item()}')

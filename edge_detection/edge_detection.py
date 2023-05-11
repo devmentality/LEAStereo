@@ -55,8 +55,8 @@ def x_grad(t_arr: torch.Tensor) -> torch.Tensor:
     return t_x_grad 
 
 
-def gradient_aware_loss(output, target):
-    target = torch.from_numpy(make_smoother_disp(target.numpy()))
+def gradient_aware_loss(output, target, device):
+    target = torch.from_numpy(make_smoother_disp(target.cpu().numpy())).to(device=device)
     out_x, out_y = x_grad(output), y_grad(output)
     t_x, t_y = x_grad(target), y_grad(target)
 
