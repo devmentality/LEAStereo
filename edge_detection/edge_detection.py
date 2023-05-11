@@ -4,8 +4,11 @@ import torch
 import torch.nn.functional as F
 
 
-def make_smoother_disp(disp_arr: np.ndarray) -> np.ndarray:
-    return cv2.medianBlur(cv2.medianBlur(disp_arr, 5), 5)
+def make_smoother_disp(disp_arr_batch: np.ndarray) -> np.ndarray:
+    smoothed_batch = []
+    for disp_arr in disp_arr_batch:
+        smoothed_batch.append(cv2.medianBlur(cv2.medianBlur(disp_arr, 5), 5))
+    return np.array(smoothed_batch)
 
 
 def transform_disp(disp_arr, min_thr):
@@ -53,7 +56,7 @@ def x_grad(t_arr: torch.Tensor) -> torch.Tensor:
 
 
 def gradient_aware_loss(output, target):
-    target = make_smoother_disp(target)
+    target = torch.from_numpy(make_smoother_disp(target.numpy()))
     out_x, out_y = x_grad(output), y_grad(output)
     t_x, t_y = x_grad(target), y_grad(target)
 
