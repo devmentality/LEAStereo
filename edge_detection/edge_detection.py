@@ -63,3 +63,12 @@ def gradient_aware_loss(output, target, device):
     t_x, t_y = x_grad(target, device), y_grad(target, device)
 
     return F.smooth_l1_loss(out_x, t_x, reduction='mean') + F.smooth_l1_loss(out_y, t_y, reduction='mean')
+
+
+def gradient_aware_loss2(output, target, device):
+    target = torch.from_numpy(make_smoother_disp(target.cpu().numpy())).to(device=device)
+    out_x, out_y = x_grad(output, device), y_grad(output, device)
+    t_x, t_y = x_grad(target, device), y_grad(target, device)
+
+    return torch.mean(torch.abs(out_x) * torch.exp(-torch.abs(t_x)) + 
+            torch.abs(out_y) * torch.exp(-torch.abs(t_y)))

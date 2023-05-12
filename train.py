@@ -17,7 +17,7 @@ from utils.early_stopping import EarlyStopping
 from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
 from utils.metrics import calculate_3px_error
-from edge_detection.edge_detection import gradient_aware_loss
+from edge_detection.edge_detection import gradient_aware_loss2
 
 opt = obtain_train_args()
 print(opt)
@@ -92,11 +92,11 @@ train_step = 0
 
 def combined_loss(predict, target, mask, grad_loss_w):
     direct_loss = F.smooth_l1_loss(predict[mask], target[mask], reduction='mean')
-    grad_loss = gradient_aware_loss(predict, target, device=device)
+    grad_loss = gradient_aware_loss2(predict, target, device=device)
     comb_loss = direct_loss + grad_loss * grad_loss_w 
 
     print(f'Direct loss: {direct_loss.item()}, Gradient loss: {grad_loss.item()}, Combined loss: {comb_loss.item()}')
-    return combined_loss
+    return comb_loss
 
 
 def calculate_validity_mask(target):
@@ -180,6 +180,14 @@ def val(epoch):
             with torch.no_grad(): 
                 disp = model(input1, input2)
                 error = torch.mean(torch.abs(disp[mask] - target[mask])) 
+                
+                direct_loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
+                grad_loss = gradient_aware_loss2(disp, target, device=device)
+                comb_loss = direct_loss + grad_loss * opt.grad_loss_w 
+
+                tb_writer.add_scalar('Validation Direct Loss', direct_loss.item(), val_step + 1)
+                tb_writer.add_scalar('Validation Gradient Loss', grad_loss.item(), val_step + 1)
+                tb_writer.add_scalar('Validation Combined Loss', comb_loss.item(), val_step + 1)
 
                 valid_iteration += 1
                 epoch_error += error.item()              
@@ -207,7 +215,7 @@ def val(epoch):
 
 
 def train_with_early_stop():
-    early_stop = EarlyStopping(opt.save_path, patience=30, delta=0.001)
+    early_stop = EarlyStopping(opt.save_path, patience=150, delta=0.001)
     epoch = 1
 
     while not early_stop.early_stop:
