@@ -183,7 +183,7 @@ def val(epoch):
                 
                 direct_loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
                 grad_loss = gradient_aware_loss2(disp, target, device=device)
-                comb_loss = direct_loss + grad_loss * opt.grad_loss_w 
+                comb_loss = direct_loss + grad_loss * opt.edge_loss_w 
 
                 tb_writer.add_scalar('Validation Direct Loss', direct_loss.item(), val_step + 1)
                 tb_writer.add_scalar('Validation Gradient Loss', grad_loss.item(), val_step + 1)
