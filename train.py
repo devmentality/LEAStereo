@@ -1,6 +1,7 @@
 import sys
 import shutil
 import os
+import cv2
 import torch
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
@@ -104,6 +105,15 @@ def calculate_validity_mask(target):
     return (target < opt.maxdisp) & (target > 0.001)
 
 
+def smooth_disp(disp_batch: torch.Tensor) -> torch.Tensor:
+    disp_batch_np = disp_batch.cpu().numpy()
+    smoothed_batch = []
+    for disp_np in disp_batch_np:
+        smoothed_batch.append(cv2.medianBlur(cv2.medianBlur(disp_np, 5), 5))
+    sm_batch_np = np.array(smoothed_batch)
+    return torch.from_numpy(sm_batch_np).to(device=device)
+
+
 def train(epoch):
     global train_step
     epoch_loss = 0
@@ -119,6 +129,9 @@ def train(epoch):
             target = target.cuda()
 
         target = torch.squeeze(target, 1)
+        
+        target = smooth_disp(target)
+
         mask = calculate_validity_mask(target)
         mask.detach_()
         valid = target[mask].size()[0]
@@ -128,8 +141,8 @@ def train(epoch):
     
             optimizer.zero_grad()
             disp = model(input1, input2)
-            #loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
-            loss = combined_loss(disp, target, mask, opt.edge_loss_w)
+            loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
+            #loss = combined_loss(disp, target, mask, opt.edge_loss_w)
             loss.backward()
             optimizer.step()
             
