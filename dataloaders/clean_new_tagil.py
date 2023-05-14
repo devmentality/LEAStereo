@@ -19,8 +19,8 @@ required = {
     'disp_R_lidar0.tif'
 }
 
-REQUIRED_NO_OCC = 0.2
-REQUIRED_NON_ZERO = 0.05
+REQUIRED_NO_OCC = 0.3
+REQUIRED_NON_ZERO = 0.8
 
 
 def is_img_valid(path: str) -> bool:
@@ -50,10 +50,16 @@ def main(args):
             is_disp_valid(os.path.join(d, 'disp_R_lidar.tif'))
         )
         if not is_valid and not args.dry_run:
+            save_name = d.name if d.name.startswith('.') else f'.{d.name}'
             print(f'invalid sample {d.name}. hiding dir')
-            shutil.move(d, os.path.join(args.dir, f'.{d.name}'))
+            shutil.move(d, os.path.join(args.dir, save_name))
         elif not is_valid:
             print(f'invalid sample {d.name}. dry run')
+        elif is_valid and not args.dry_run:
+            if d.name.startswith('.'):
+                save_name = d.name[1:]
+                print(f'valid sample {d.name}. unhiding dir')
+                shutil.move(d, os.path.join(args.dir, save_name))
 
         if i % 100 == 0:
             print(f"Handled {i} of {len(dirs)}", file=sys.stderr)
