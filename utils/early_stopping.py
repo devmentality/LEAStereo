@@ -38,10 +38,16 @@ class EarlyStopping:
             self.val_loss_min = val_loss
             self.counter = 0
 
-    def save_checkpoint(self, val_loss, epoch, state):
+        if epoch % 20 == 0:
+            self.save_checkpoint(val_loss, epoch, state, is_best=False)
+
+    def save_checkpoint(self, val_loss, epoch, state, is_best=True):
         """Saves model when validation loss decrease."""
         print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        filename = self.save_path + f"best_epoch_{epoch}.pth"
+        if is_best:
+            filename = self.save_path + f"best_epoch_{epoch}.pth"
+        else:
+            filename = self.save_path + f"epoch_{epoch}.pth"
         torch.save(state, filename)
         print(f"Checkpoint saved to {filename}")
 
