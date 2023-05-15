@@ -21,46 +21,48 @@ def main(args):
                     sample_set.add(line.rstrip())
 
         dirs = [d for d in dirs if d.name in sample_set]
+    else:
+        dirs = [d for d in dirs if not d.name.startswith('.')]
 
     for d in dirs:
-        im_path = os.path.join(d.path, 'img_L.tif')
-        disp_path = os.path.join(d.path, 'disp_L_lidar.tif')
+        l_path = os.path.join(d.path, 'img_L.tif')
+        r_path = os.path.join(d.path, 'img_R.tif')
         disp0_path = os.path.join(d.path, 'disp_L_lidar0.tif')
 
-        im_render_path = os.path.join(args.out_dir,  f'{d.name}_render_L.jpeg')
-        disp_render_path = os.path.join(args.out_dir, f'{d.name}_render_disp_L_lidar.jpeg')
+        l_render_path = os.path.join(args.out_dir,  f'{d.name}_render_L.jpeg')
+        r_render_path = os.path.join(args.out_dir,  f'{d.name}_render_R.jpeg')
+
         disp0_render_path = os.path.join(args.out_dir, f'{d.name}_render_disp_L_lidar0.jpeg')
 
-        render_image(im_path, im_render_path)
-        render_disp(disp_path, disp_render_path)
-        render_disp(disp0_path, disp0_render_path)
+        make_render(Image.open(l_path), 0, 250).save(l_render_path)
+        make_render(Image.open(r_path), 0, 250).save(r_render_path)        
+        make_disp_render(Image.open(disp0_path), 30, 250).save(disp0_render_path)
 
         print(f'Rendered in {d.name}')
 
 
-def render_image(fin, fout):
-    im = Image.open(fin)
-    arr = np.array(im)
-    mx = np.nanmax(arr)
-    mi = np.nanmin(arr)
+def make_render(in_img, new_min, new_max):
+    in_arr = np.asarray(in_img)
+    in_min = np.min(in_arr)
+    in_rng = np.max(in_arr) - np.min(in_arr)
 
-    arr = np.floor(arr * 200 / (mx - mi)).astype(np.uint8)
+    new_rng = new_max - new_min
 
-    oim = Image.fromarray(arr)
-    oim.save(fout)
+    new_arr = (in_arr.astype(float) - in_min) * new_rng / in_rng + new_min
+    return Image.fromarray(new_arr.astype(np.uint8))
 
 
-def render_disp(fin, fout):
-    im = Image.open(fin)
-    arr = np.array(im)
-    nans = np.isnan(arr)
+def make_disp_render(in_disp, new_min, new_max):
+    in_arr = np.asarray(in_disp).copy()
+    in_min = np.nanmin(in_arr)
+    in_rng = np.nanmax(in_arr) - np.nanmin(in_arr)
 
-    arr = np.floor(arr).astype(np.uint8)
-    rgb_arr = np.moveaxis(np.array([arr, arr, arr]), [0], [2])
-    rgb_arr[nans] = np.array([255, 0, 0])
+    new_rng = new_max - new_min
 
-    oim = Image.fromarray(rgb_arr)
-    oim.save(fout)
+    new_arr = (in_arr - in_min) * new_rng / in_rng + new_min
+    new_arr[np.isnan(new_arr)] = 0
+    
+    return Image.fromarray(new_arr.astype(np.uint8))
 
 
 if __name__ == "__main__":
