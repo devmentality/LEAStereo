@@ -13,7 +13,7 @@ def main(args):
         subdirs = [sd for sd in os.scandir(d) if sd.is_dir()]
         for sd in subdirs:
             res_name= os.path.join(sd, '60_midd_eval.log')
-            print(f'handling {sd}')
+            print(f'handling {sd.path}')
             all_cnt += 1
 
             if os.path.exists(res_name):
