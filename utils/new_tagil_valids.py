@@ -19,7 +19,7 @@ def main(args):
                     if len(lines) >= 3:
                         header = lines[1]
                         if header.startswith('vis% d_err% o_err% t_err% mean_err'):
-                            metrics = map(float, lines[2].split())
+                            metrics = list(map(float, lines[2].split()))
                             print(f'd_err: {metrics[1]}; mean_err; {metrics[3]}')
                         else:
                             print(f'file not matched. lines: {lines}')
