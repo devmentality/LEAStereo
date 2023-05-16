@@ -194,13 +194,13 @@ def val(epoch):
                 disp = model(input1, input2)
                 error = torch.mean(torch.abs(disp[mask] - target[mask])) 
                 
-                direct_loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
-                grad_loss = gradient_aware_loss2(disp, target, device=device)
-                comb_loss = direct_loss + grad_loss * opt.edge_loss_w 
+                # direct_loss = F.smooth_l1_loss(disp[mask], target[mask], reduction='mean')
+                #grad_loss = gradient_aware_loss2(disp, target, device=device)
+                #comb_loss = direct_loss + grad_loss * opt.edge_loss_w 
 
-                tb_writer.add_scalar('Validation Direct Loss', direct_loss.item(), val_step + 1)
-                tb_writer.add_scalar('Validation Gradient Loss', grad_loss.item(), val_step + 1)
-                tb_writer.add_scalar('Validation Combined Loss', comb_loss.item(), val_step + 1)
+                #tb_writer.add_scalar('Validation Direct Loss', direct_loss.item(), val_step + 1)
+                #tb_writer.add_scalar('Validation Gradient Loss', grad_loss.item(), val_step + 1)
+                #tb_writer.add_scalar('Validation Combined Loss', comb_loss.item(), val_step + 1)
 
                 valid_iteration += 1
                 epoch_error += error.item()              

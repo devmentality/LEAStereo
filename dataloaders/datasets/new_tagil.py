@@ -7,10 +7,10 @@ from .common import set_rgb_layers
 
 def read_disparity_image(file_name: str) -> np.ndarray:
     image = Image.open(file_name)
-    data = np.asarray(image)
-    disparity_map = np.nan_to_num(data)
+    data = np.asarray(image).copy()
+    data[np.isnan(data)] = 999
 
-    return disparity_map
+    return data
 
 
 def load_data_new_tagil(data_path, current_file):
