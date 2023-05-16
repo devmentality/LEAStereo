@@ -24,7 +24,7 @@ def main(args):
                         if header.startswith('vis% d_err% o_err% t_err% mean_err'):
                             metrics = list(map(float, lines[2].split()))
                             ok_cnt += 1
-                            print(f'd_err: {metrics[1]}; mean_err; {metrics[3]}')
+                            print(f'vis: {metrics[0]}; d_err: {metrics[1]}; o_err: {metrics[2]}, t_err: {metrics[3]} mean_err: {metrics[4]}')
                         else:
                             print(f'file not matched. lines: {lines}')
                     else:
