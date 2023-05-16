@@ -9,7 +9,8 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument("--dir", type=str, help="dataset dir")
 parser.add_argument("--dry_run", type=bool, default=True, help="do hiding of invalid")
-parser.add_argument("--skip_hidden", type=int, default=1, help="skip hidden sample? 0-no,1-yes")
+parser.add_argument("--skip_hidden", type=int, default=1, help="skip hidden sample? 0-no, 1-yes")
+parser.add_argument("--white_list", type=int, default=0, help="use white list file? 0-no, 1-yes")
 
 required = {
     'img_L.tif',
@@ -51,6 +52,12 @@ def valid_high_frac(path: str) -> bool:
 
 
 def main(args):
+    white_list = set()
+    if args.white_list:
+        with open('white_list.txt') as wl_file:
+            for l in wl_file.readlines():
+                white_list.add(l.rstrip())
+
     dirs = [d for d in os.scandir(args.dir) if d.is_dir()]
     for i in range(len(dirs)):
         d = dirs[i]
@@ -64,7 +71,8 @@ def main(args):
             is_disp_valid(os.path.join(d, 'disp_L_lidar.tif')) and
             is_disp_valid(os.path.join(d, 'disp_R_lidar.tif')) and
             valid_high_frac(os.path.join(d, 'img_L.tif')) and
-            valid_high_frac(os.path.join(d, 'img_R.tif'))
+            valid_high_frac(os.path.join(d, 'img_R.tif')) and
+            (not args.white_list or d.name in white_list) 
         )
 
         if not is_valid and not args.dry_run:
