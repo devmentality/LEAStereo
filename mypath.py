@@ -12,7 +12,7 @@ class Path(object):
         elif dataset == 'sceneflow_part':
             return './dataset/sceneflow_part/'
         elif dataset == 'satellite':
-            return './dataset/l2d_ntagil_20220319/'
+            return './dataset/old_tagil/'
         elif dataset == 'dfc2019':
             return './dataset/dfc2019/'
         elif dataset == 'new_tagil':
