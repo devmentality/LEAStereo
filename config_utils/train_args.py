@@ -43,6 +43,8 @@ def obtain_train_args():
                         help='Path to lists under dataloaders/lists subfolder')
     parser.add_argument('--edge_loss_w', type=float, default=0.2, 
                         help='weight of edge-aware loss [0-1]')
+    parser.add_argument('--freeze_feature', type=int, default=0, 
+                        help='freeze feature net weights for transfer learning')
 
     add_leastereo_args(parser)
 

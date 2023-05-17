@@ -82,6 +82,10 @@ if opt.resume:
     else:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
+if opt.freeze_feature:
+    for param in model.feature.parameters():
+        param.requires_grad = False
+
 os.makedirs('./logs', exist_ok=True)
 
 tb_dir = f'./logs/{opt.experiment}'
