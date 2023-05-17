@@ -79,14 +79,14 @@ def train_transform(temp_data, crop_height, crop_width, use_left=True, left_righ
 
     if use_left or (random.randint(0, 1) == 0 and left_right):
         # use left disp
-        right = temp_data[0: 3, :, :]
-        left = temp_data[3: 6, :, :]
+        left = temp_data[0: 3, :, :]
+        right = temp_data[3: 6, :, :]
         target = temp_data[6: 7, :, :]
         return left, right, target
     else:
         # use right
-        left = temp_data[0: 3, :, :]
-        right = temp_data[3: 6, :, :]
+        right = temp_data[0: 3, :, :]
+        left = temp_data[3: 6, :, :]
         target = temp_data[7: 8, :, :]
         return left, right, target
 
