@@ -44,7 +44,7 @@ if cuda:
     torch.cuda.manual_seed(opt.seed)
 
 print('===> Loading datasets')
-kwargs = {'num_workers': opt.threads, 'pin_memory': True, 'drop_last':True}
+kwargs = {'num_workers': opt.threads, 'pin_memory': False, 'drop_last':True}
 training_data_loader, val_data_loader = make_train_data_loaders(opt, **kwargs)
 
 print('===> Building model')
@@ -138,7 +138,7 @@ def train(epoch):
 
         target = torch.squeeze(target, 1)
         
-        target = smooth_disp(target)
+        # target = smooth_disp(target)
 
         mask = calculate_validity_mask(target)
         mask.detach_()
