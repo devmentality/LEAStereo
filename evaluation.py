@@ -16,7 +16,7 @@ from utils.multadds_count import count_parameters_in_MB, comp_multadds
 from utils.metrics import calculate_3px_error_and_correct_mask
 from retrain.LEAStereo import LEAStereo
 from config_utils.evaluation_args import obtain_evaluation_args
-from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite, load_data_new_tagil, load_data_whu
+from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite, load_data_new_tagil, load_data_whu, load_data_whu2new_tagil
 
 opt = obtain_evaluation_args()
 
@@ -215,10 +215,17 @@ def main():
             skimage.io.imsave(in_savename, leftsave)
         elif opt.new_tagil:
             print(f"Running for new tagil {current_file}")
-            data = load_data_new_tagil(file_path, current_file)
-            left = data[0:3, :, :]
-            right = data[3: 6, :, :]
-            disp = data[6, :, :]
+
+            if opt.whu2new_tagil:
+                data = load_data_whu2new_tagil(file_path, current_file)
+                left = data[0:3, :, :]
+                right = data[3: 6, :, :]
+                disp = data[7, :, :]
+            else:
+                data = load_data_new_tagil(file_path, current_file)
+                left = data[0:3, :, :]
+                right = data[3: 6, :, :]
+                disp = data[6, :, :]
 
             savename = opt.save_path + current_file + '.png'
 

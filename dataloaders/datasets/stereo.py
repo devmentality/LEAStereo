@@ -8,6 +8,7 @@ from .common import read_pfm, set_rgb_layers, train_transform, test_transform
 from .satellite import load_data_satellite
 from .new_tagil import load_data_new_tagil
 from .whu import load_data_whu
+from .whu2new_tagil import load_data_whu2new_tagil
 
 
 def load_data_sceneflow(data_path, current_file):
