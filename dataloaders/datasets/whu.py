@@ -10,19 +10,22 @@ HOR_SHIFT = 64
 
 def read_left_image(file_name: str) -> np.ndarray:
     img = Image.open(file_name)
-    img = img.crop((0, 0, img.size[0] - HOR_SHIFT, img.size[1]))
+    #img = img.crop((0, 0, img.size[0] - HOR_SHIFT, img.size[1]))
+    img = img.crop((HOR_SHIFT, 0, img.size[0], img.size[1]))
     return np.asarray(img)
 
 
 def read_right_image(file_name: str) -> np.ndarray:
     img = Image.open(file_name)
-    img = img.crop((HOR_SHIFT, 0, img.size[0], img.size[1]))
+    #img = img.crop((HOR_SHIFT, 0, img.size[0], img.size[1]))
+    img = img.crop((0, 0, img.size[0] - HOR_SHIFT, img.size[1]))
     return np.asarray(img)
 
 
 def read_disparity_image(file_name: str) -> np.ndarray:
     disp = Image.open(file_name)
-    disp = disp.crop((0, 0, disp.size[0] - HOR_SHIFT, disp.size[1]))
+    #disp = disp.crop((0, 0, disp.size[0] - HOR_SHIFT, disp.size[1]))
+    disp = disp.crop((HOR_SHIFT, 0, disp.size[0], disp.size[1]))
 
     disp_arr = np.asarray(disp)
     disp_arr = (-1) * disp_arr + HOR_SHIFT
