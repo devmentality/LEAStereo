@@ -172,3 +172,19 @@ class newMatching(nn.Module):
         elif last_output.size()[3] == h//8:
             mat = self.last_3(upsample_6(self.last_6(upsample_12(self.last_12(upsample_24(self.last_24(last_output)))))))      
         return mat  
+    
+    def freeze_layers(self, n_layers: int):
+        print(f'Freezing first {n_layers} layers of matching net')
+        freeze_module(self.stem0)
+        freeze_module(self.stem1)
+        for i in range(min(n_layers, 12)):
+            freeze_module(self.cells[i])   
+            if i == 4:
+                freeze_module(self.conv1)
+            elif i == 8:
+                freeze_module(self.conv2)  
+
+
+def freeze_module(module):
+    for param in module.parameters():
+        param.requires_grad = False

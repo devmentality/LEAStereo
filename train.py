@@ -83,8 +83,12 @@ if opt.resume:
         print("=> no checkpoint found at '{}'".format(opt.resume))
 
 if opt.freeze_feature:
-    for param in model.feature.parameters():
+    print('Freezing feature')
+    for param in model.module.feature.parameters():
         param.requires_grad = False
+
+if opt.freeze_matching:
+    model.module.matching.freeze_layers(opt.freeze_matching)
 
 os.makedirs('./logs', exist_ok=True)
 

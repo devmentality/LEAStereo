@@ -45,6 +45,8 @@ def obtain_train_args():
                         help='weight of edge-aware loss [0-1]')
     parser.add_argument('--freeze_feature', type=int, default=0, 
                         help='freeze feature net weights for transfer learning')
+    parser.add_argument('--freeze_matching', type=int, default=0,
+                        help='number of layers in mathcing net to freeze')
 
     add_leastereo_args(parser)
 
