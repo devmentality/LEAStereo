@@ -25,6 +25,7 @@ def read_left_disparity_image(file_name: str) -> np.ndarray:
     image = image.crop((0, 0, image.size[0] - HOR_SHIFT, image.size[1]))
     data = np.asarray(image).copy()
     data[np.isnan(data)] = 999
+    data += HOR_SHIFT
 
     return data
 
@@ -34,6 +35,7 @@ def read_right_disparity_image(file_name: str) -> np.ndarray:
     image = image.crop((HOR_SHIFT, 0, image.size[0], image.size[1]))
     data = np.asarray(image).copy()
     data[np.isnan(data)] = 999
+    data += HOR_SHIFT
 
     return data
 
