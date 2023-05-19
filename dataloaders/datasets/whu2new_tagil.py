@@ -22,7 +22,7 @@ def read_right_image(file_name: str) -> np.ndarray:
 
 def read_left_disparity_image(file_name: str) -> np.ndarray:
     image = Image.open(file_name)
-    image = -image.crop((0, 0, image.size[0] - HOR_SHIFT, image.size[1]))
+    image = image.crop((0, 0, image.size[0] - HOR_SHIFT, image.size[1]))
     data = np.asarray(image).copy()
     data[np.isnan(data)] = 999
 

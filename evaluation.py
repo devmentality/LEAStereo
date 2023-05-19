@@ -282,7 +282,7 @@ def main():
 
         print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}")
 
-        skimage.io.imsave(savename, prediction)
+        skimage.io.imsave(savename, prediction.astype(np.uint8))
 
         ground_truth_name = opt.save_path + current_file + '_gt.png'
         gt_arr = disp.astype(np.uint8)
