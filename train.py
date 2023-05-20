@@ -10,8 +10,9 @@ import torch.nn.functional as F
 import numpy as np
 from torch.autograd import Variable
 from time import time
-from retrain.LEAStereo import LEAStereo
+import torch.multiprocessing
 
+from retrain.LEAStereo import LEAStereo
 from dataloaders.make_data_loaders import make_train_data_loaders
 from utils.multadds_count import count_parameters_in_MB
 from utils.early_stopping import EarlyStopping
@@ -19,6 +20,9 @@ from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
 from utils.metrics import calculate_3px_error
 from edge_detection.edge_detection import gradient_aware_loss2
+
+
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 opt = obtain_train_args()
 print(opt)
