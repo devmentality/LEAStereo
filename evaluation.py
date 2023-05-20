@@ -288,6 +288,10 @@ def main():
         bad_1 = calculate_bad_pixel_frac(predicted_disparity, true_disparity, opt.maxdisp, 1)
         bad_1_all += bad_1
 
+        with open(f'{current_file}_metrics.txt', 'w') as metrics_file:
+            metrics_file.write('EPE\tD1\tBad2\tBad1\n')
+            metrics_file.write(f'{error}\t{three_px_error}\t{bad_2}\t{bad_1}\n')
+
         print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}, bad 2.0: {bad_2:.3f}, bad 1.0: {bad_1:.3f}")
 
         skimage.io.imsave(savename, prediction.astype(np.uint8))
