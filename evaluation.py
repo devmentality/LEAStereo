@@ -13,7 +13,7 @@ from PIL import Image
 from struct import unpack
 from torch.autograd import Variable
 from utils.multadds_count import count_parameters_in_MB, comp_multadds
-from utils.metrics import calculate_3px_error_and_correct_mask
+from utils.metrics import calculate_3px_error_and_correct_mask, calculate_bad_pixel_frac
 from retrain.LEAStereo import LEAStereo
 from config_utils.evaluation_args import obtain_evaluation_args
 from dataloaders.datasets.stereo import load_data_dfc2019, load_data_satellite, load_data_new_tagil, load_data_whu, load_data_whu2new_tagil
@@ -178,6 +178,8 @@ def main():
     filelist = f.readlines()
     avg_error = 0
     three_px_error_all = 0
+    bad_2_all = 0
+    bad_1_all = 0
 
     for index in range(len(filelist)):
         current_file = filelist[index][:-1]
@@ -280,7 +282,13 @@ def main():
         three_px_error, correct = calculate_3px_error_and_correct_mask(predicted_disparity, true_disparity, opt.maxdisp)
         three_px_error_all += three_px_error
 
-        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}")
+        bad_2 = calculate_bad_pixel_frac(predicted_disparity, true_disparity, opt.maxdisp, 2)
+        bad_2_all += bad_2
+
+        bad_1 = calculate_bad_pixel_frac(predicted_disparity, true_disparity, opt.maxdisp, 1)
+        bad_1_all += bad_1
+
+        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}, bad 2.0: {bad_2:.3f}, bad 1.0: {bad_1:.3f}")
 
         skimage.io.imsave(savename, prediction.astype(np.uint8))
         skimage.io.imsave(opt.save_path + current_file + '.tif', prediction)
@@ -295,7 +303,11 @@ def main():
 
     avg_error = avg_error / len(filelist)
     avg_three_px_error = three_px_error_all / len(filelist)
-    print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG 3px Error: {:.4f}".format(len(filelist), avg_error, avg_three_px_error))
+    avg_bad_2 = bad_2_all / len(filelist)
+    avg_bad_1 = bad_1_all / len(filelist)
+
+    print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG 3px Error: {:.4f}, AVG Bad 2.0: {:.4f}, AVG Bad 1.0: {:.4f}".format(
+        len(filelist), avg_error, avg_three_px_error, avg_bad_2, avg_bad_1))
 
 
 if __name__ == "__main__":
