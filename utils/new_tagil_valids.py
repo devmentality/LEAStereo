@@ -27,7 +27,7 @@ def main(args):
                                 ok_cnt += 1
                                 print(f'vis: {metrics[0]}; d_err: {metrics[1]}; o_err: {metrics[2]}, t_err: {metrics[3]} mean_err: {metrics[4]}')
                                 sample_name = f'{d.name}_{sd.name}'
-                                metrics_file.write(f'{sample_name} {metrics[1]} {metrics[3]}\n')
+                                metrics_file.write(f'{sample_name} {metrics[1]} {metrics[2]} {metrics[3]} {metrics[4]}\n')
                             else:
                                 print(f'file not matched. lines: {lines}')
                         else:
