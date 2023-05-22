@@ -244,17 +244,17 @@ val_params = [
     [
         'Tagil 1-2',
         'dataloaders/lists/new_tagil_1_2_clean/val.list',
-        'datasets/new_tagil_1_2'
+        'dataset/new_tagil_1_2'
     ],
      [
         'Tagil 3-4',
         'dataloaders/lists/new_tagil_3_4_clean/val.list',
-        'datasets/new_tagil_3_4'
+        'dataset/new_tagil_3_4'
     ],
      [
         'Tagil 5-6',
         'dataloaders/lists/new_tagil_5_6_clean/val.list',
-        'datasets/new_tagil_5_6'
+        'dataset/new_tagil_5_6'
     ],
 ]
 
