@@ -47,6 +47,9 @@ def obtain_train_args():
                         help='freeze feature net weights for transfer learning')
     parser.add_argument('--freeze_matching', type=int, default=0,
                         help='number of layers in mathcing net to freeze')
+    parser.add_argument('--val12', type=int, default=0, help='validate tagil 12')
+    parser.add_argument('--val34', type=int, default=0, help='validate tagil 34')
+    parser.add_argument('--val56', type=int, default=0, help='validate tagil 56')
 
     add_leastereo_args(parser)
 

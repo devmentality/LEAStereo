@@ -20,6 +20,7 @@ from config_utils.train_args import obtain_train_args
 from torch.utils.tensorboard import SummaryWriter
 from utils.metrics import calculate_3px_error
 from edge_detection.edge_detection import gradient_aware_loss2
+from dataloaders.datasets.stereo import load_data_new_tagil
 
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -239,6 +240,128 @@ def val(epoch):
     return avg_three_px_error
 
 
+val_params = [
+    [
+        'Tagil 1-2',
+        'dataloaders/lists/new_tagil_1_2_clean/val.list',
+        'datasets/new_tagil_1_2'
+    ],
+     [
+        'Tagil 3-4',
+        'dataloaders/lists/new_tagil_3_4_clean/val.list',
+        'datasets/new_tagil_3_4'
+    ],
+     [
+        'Tagil 5-6',
+        'dataloaders/lists/new_tagil_5_6_clean/val.list',
+        'datasets/new_tagil_5_6'
+    ],
+]
+
+
+def val_other(epoch):
+    if opt.val12:
+        val_for(epoch, *val_params[0])
+    if opt.val34:
+        val_for(epoch, *val_params[1])
+    if opt.val56:
+        val_for(epoch, *val_params[2])
+
+
+def val_for(epoch, dataset_name, list_path, data_path):
+    f = open(list_path, 'r')
+    filelist = f.readlines()
+
+    avg_error = 0
+    three_px_error_all = 0
+
+    for index in range(len(filelist)):
+        current_file = filelist[index][:-1]
+        
+        data = load_data_new_tagil(data_path, current_file)
+        left = data[0:3, :, :]
+        right = data[3: 6, :, :]
+        disp = data[6, :, :]
+
+        prediction = predict(left, right)
+        disp = crop_array_grayscale(disp, opt.crop_height, opt.crop_width)
+
+        mask =  (disp >= 0.001, disp <= opt.maxdisp)
+        error = np.mean(np.abs(prediction[mask] - disp[mask]))
+        avg_error += error
+
+        predicted_disparity = prediction
+        true_disparity = disp
+
+        three_px_error = calculate_3px_error(predicted_disparity, true_disparity, opt.maxdisp)
+        three_px_error_all += three_px_error
+
+        print(f"===> Frame {dataset_name} {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}")
+
+    avg_error = avg_error / len(filelist)
+    avg_three_px_error = three_px_error_all / len(filelist)
+
+    tb_writer.add_scalar(f'{dataset_name} Validation Epoch EPE', avg_error, epoch)
+    tb_writer.add_scalar(f'{dataset_name} Validation Epoch 3px error', avg_three_px_error, epoch)
+
+    print(f"===> {dataset_name} Total {len(filelist)} Frames ==> AVG EPE Error: {avg_error:.4f}, AVG 3px Error: {avg_three_px_error:.4f}")
+
+
+def predict(left, right):
+    _, height, width = np.shape(left)
+    input1 = np.ones([1, 3, opt.crop_height, opt.crop_width], 'float32')
+    input1[0, :, :, :] = crop_array(left, opt.crop_height, opt.crop_width)
+
+    input2 = np.ones([1, 3, opt.crop_height, opt.crop_width], 'float32')
+    input2[0, :, :, :] = crop_array(right, opt.crop_height, opt.crop_width)
+
+    input1 = Variable(torch.from_numpy(input1).float(), requires_grad=False)
+    input2 = Variable(torch.from_numpy(input2).float(), requires_grad=False)
+
+    model.eval()
+    if cuda:
+        input1 = input1.cuda()
+        input2 = input2.cuda()
+
+    with torch.no_grad():
+        prediction = model(input1, input2)
+
+    temp = prediction.cpu()
+    temp = temp.detach().numpy()
+    if height <= opt.crop_height or width <= opt.crop_width:
+        return temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
+    else:
+        return temp[0, :, :]
+    
+
+def crop_array_grayscale(data, crop_height, crop_width):
+    h, w = np.shape(data)
+
+    if h <= crop_height and w <= crop_width:
+        result = np.zeros([crop_height, crop_width], 'float32')
+        result[crop_height - h: crop_height, crop_width - w: crop_width] = data
+    else:
+        start_x = (w - crop_width) // 2
+        start_y = (h - crop_height) // 2
+        result = data[start_y: start_y + crop_height, start_x: start_x + crop_width]
+
+    return result
+
+
+def crop_array(data, crop_height, crop_width):
+    n_layers, h, w = np.shape(data)
+
+    if h <= crop_height and w <= crop_width:
+        result = np.zeros([n_layers, crop_height, crop_width], 'float32')
+        result[:, crop_height - h: crop_height, crop_width - w: crop_width] = data
+    else:
+        start_x = (w - crop_width) // 2
+        start_y = (h - crop_height) // 2
+        result = data[:, start_y: start_y + crop_height, start_x: start_x + crop_width]
+
+    return result
+
+
 def train_with_early_stop():
     early_stop = EarlyStopping(opt.save_path, patience=1500, delta=0.001)
     epoch = 1
@@ -251,6 +374,7 @@ def train_with_early_stop():
             'state_dict': model.state_dict(),
             'optimizer': optimizer.state_dict(),
         }
+        val_other(epoch)
         early_stop(loss, state, epoch)
         scheduler.step()
         epoch += 1
