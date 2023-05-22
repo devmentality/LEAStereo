@@ -286,7 +286,7 @@ def val_for(epoch, dataset_name, list_path, data_path):
         prediction = predict(left, right)
         disp = crop_array_grayscale(disp, opt.crop_height, opt.crop_width)
 
-        mask =  (disp >= 0.001, disp <= opt.maxdisp)
+        mask = np.logical_and(disp >= 0.001, disp <= opt.maxdisp)
         error = np.mean(np.abs(prediction[mask] - disp[mask]))
         avg_error += error
 
