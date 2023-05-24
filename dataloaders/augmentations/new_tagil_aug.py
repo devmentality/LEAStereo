@@ -101,6 +101,7 @@ def hor_flip_aug(sample, flip_prob):
     if c == 0:
         return sample
     else:
+        print(f'hflip {sample.name}')
         return hflip_sample(sample)
 # horizontal flip end
 
@@ -122,6 +123,7 @@ def vert_flip_aug(sample, flip_prob):
     if c == 0:
         return sample
     else:
+        print(f'vflip {sample.name}')
         return vflip_sample(sample)
 # vertical flip end
 
