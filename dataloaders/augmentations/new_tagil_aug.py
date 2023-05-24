@@ -441,10 +441,11 @@ def crop_aug(samples, crop_size, n_crops): # size = (w, h)
 
 
 pipeline = [
-    #aug(lambda s: hor_flip_aug(s, 0.5)),
-    #aug(lambda s: vert_flip_aug(s, 0.5))
-    #aug(lambda s: warp_aug(s, 1, 0.3))
-    #aug(lambda s: scale_aug(s, 1, 0.3))
+    aug(lambda s: hor_flip_aug(s, 0.5)),
+    aug(lambda s: warp_aug(s, 0.5, 0.3)),
+    aug(lambda s: shift_aug(s, 0.5, 32)),
+    aug(lambda s: vert_flip_aug(s, 0.5)),
+    aug(lambda s: scale_aug(s, 0.3, 0.3)),
     lambda ss: crop_aug(ss, (700, 500), 5)
 ]
 
