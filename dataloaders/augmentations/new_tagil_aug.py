@@ -291,6 +291,7 @@ def warp_right_from_left(sample: Sample, scale: float): # -> sample
     scaled_disp0l = (scale * np.array(sample.disp0l)).round()
     
     return Sample(
+        name=sample.name,
         left=sample.left,
         right=Image.fromarray(projected_right.round()),
         displ=Image.fromarray(scaled_displ),
@@ -306,6 +307,7 @@ def warp_aug(sample, warp_prob, max_scale_diff):
         return sample
     elif c == 1: # warp right from left
         scale = 1 + (2 * random.random() - 1) * max_scale_diff
+        print(f'warp {sample.name} with scale {scale}')
         return warp_right_from_left(sample.left, sample.displ, scale) 
 # warping end
 
@@ -313,7 +315,7 @@ def warp_aug(sample, warp_prob, max_scale_diff):
 pipeline = [
     #aug(lambda s: hor_flip_aug(s, 0.5)),
     #aug(lambda s: vert_flip_aug(s, 0.5))
-    aug(lambda s: warp_aug(sample, 1, 0.3))
+    aug(lambda s: warp_aug(s, 1, 0.3))
 ]
 
 
