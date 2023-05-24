@@ -45,7 +45,8 @@ def read_sample(dir, sample_name):
 
 
 def store_sample(dir, sample):
-    sample_name = sample.name + f"_{random.randint(1, 1000)}"
+    sample_name = sample.name + f"_{random.randint(1, 100000)}"
+    print(f'Storing sample {sample_name}')
     os.mkdir(os.path.join(dir, sample_name))
 
     left_name = os.path.join(dir, sample_name, 'img_L.tif')
@@ -476,5 +477,4 @@ if __name__ == "__main__":
 
     os.mkdir(args.out_dir)
     for sample in result:
-        print('Storing sample')
         store_sample(args.out_dir, sample)
