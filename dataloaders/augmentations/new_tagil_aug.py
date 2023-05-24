@@ -390,6 +390,7 @@ def scale_disp(disp, scale):
 
 def scale_sample(sample, scale):
     return Sample(
+            name=sample.name,
             left=scale_image(sample.left, scale),
             right=scale_image(sample.right, scale),
             displ=scale_disp(sample.displ, scale),
