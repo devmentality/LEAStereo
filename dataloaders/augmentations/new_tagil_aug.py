@@ -143,6 +143,7 @@ def shift_sample(sample, shift):
     
     elif shift > 0: # increase disparity
         return Sample(
+            name=sample.name,
             left=crop_right(sample.left, shift),
             right=crop_left(sample.right, shift),
             displ=shift_disp(crop_right(sample.displ, shift), shift),
@@ -153,6 +154,7 @@ def shift_sample(sample, shift):
         
     else: # decrease disparity
         return Sample(
+            name=sample.name,
             left=crop_left(sample.left, -shift),
             right=crop_right(sample.right, -shift),
             displ=shift_disp(crop_left(sample.displ, -shift), shift),
