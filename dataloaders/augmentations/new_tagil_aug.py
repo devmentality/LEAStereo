@@ -411,11 +411,41 @@ def scale_aug(sample, prob, max_scale_diff):
 # scale end
 
 
+# crop begin
+def make_crop_box(src_h, src_w, crop_h, crop_w):
+    max_left = src_w - crop_w
+    max_top = src_h - crop_h
+    left = random.randrange(0, max_left)
+    top = random.randrange(0, max_top)
+    return (left, top, left + crop_w, top + crop_h)
+
+
+def random_crop_sample(sample, crop_size):
+    box = make_crop_box(sample.left.size[1], sample.left.size[0], crop_size[1], crop_size[0])
+    return Sample(
+            name=sample.name,
+            left=sample.left.crop(box),
+            right=sample.right.crop(box),
+            displ=sample.displ.crop(box),
+            dispr=sample.dispr.crop(box),
+            disp0l=sample.disp0l.crop(box),
+            disp0r=sample.disp0r.crop(box)
+        )
+
+
+def crop_aug(samples, crop_size, n_crops): # size = (w, h)
+    for s in samples:
+        for i in range(n_crops):
+            yield random_crop_sample(s, crop_size)
+# crop end
+
+
 pipeline = [
     #aug(lambda s: hor_flip_aug(s, 0.5)),
     #aug(lambda s: vert_flip_aug(s, 0.5))
     #aug(lambda s: warp_aug(s, 1, 0.3))
-    aug(lambda s: scale_aug(s, 1, 0.3))
+    #aug(lambda s: scale_aug(s, 1, 0.3))
+    lambda ss: crop_aug(ss, (700, 500), 5)
 ]
 
 
