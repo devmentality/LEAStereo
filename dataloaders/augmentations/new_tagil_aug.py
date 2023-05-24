@@ -375,11 +375,46 @@ def warp_aug(sample, warp_prob, max_scale_diff):
         return warp_right_from_right(sample, scale)
 # warping end
 
+# scale begin
+def scale_image(img, scale):
+    new_size = (np.array(img.size) * scale).astype(int)
+    return img.resize(new_size)
+
+
+def scale_disp(disp, scale):
+    new_size = (np.array(disp.size) * scale).astype(int)
+    scaled_disp = disp.resize(new_size, Image.NEAREST)
+    scaled_disp = (np.asarray(scaled_disp) * scale).round()
+    return Image.fromarray(scaled_disp)
+
+
+def scale_sample(sample, scale):
+    return Sample(
+            left=scale_image(sample.left, scale),
+            right=scale_image(sample.right, scale),
+            displ=scale_disp(sample.displ, scale),
+            dispr=scale_disp(sample.dispr, scale),
+            disp0l=scale_disp(sample.disp0l, scale),
+            disp0r=scale_disp(sample.disp0r, scale)
+        )
+
+
+def scale_aug(sample, prob, max_scale_diff):
+    c = choose([1 - prob, prob])
+    if c == 0:
+        return sample
+    elif c == 1:
+        scale = 1 + (2 * random.random() - 1) * max_scale_diff
+        print(f'scale {sample.name} with scale {scale}')
+        return scale_sample(sample, scale)
+# scale end
+
 
 pipeline = [
     #aug(lambda s: hor_flip_aug(s, 0.5)),
     #aug(lambda s: vert_flip_aug(s, 0.5))
-    aug(lambda s: warp_aug(s, 1, 0.3))
+    #aug(lambda s: warp_aug(s, 1, 0.3))
+    aug(lambda s: scale_aug(s, 1, 0.3))
 ]
 
 
