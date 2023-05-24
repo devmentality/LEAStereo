@@ -124,6 +124,60 @@ def vert_flip_aug(sample, flip_prob):
         return vflip_sample(sample)
 # vertical flip end
 
+# disparity shift begin
+def crop_right(img, sz):
+    return img.crop((0, 0, img.size[0] - sz, img.size[1]))
+
+
+def crop_left(img, sz):
+    return img.crop((sz, 0, img.size[0], img.size[1]))
+
+
+def shift_disp(disp, shift):
+    return Image.fromarray(np.asarray(disp) + shift)
+
+
+def shift_sample(sample, shift):
+    if shift == 0:
+        return sample
+    
+    elif shift > 0: # increase disparity
+        return Sample(
+            left=crop_right(sample.left, shift),
+            right=crop_left(sample.right, shift),
+            displ=shift_disp(crop_right(sample.displ, shift), shift),
+            dispr=shift_disp(crop_left(sample.dispr, shift), shift),
+            disp0l=shift_disp(crop_right(sample.disp0l, shift), shift),
+            disp0r=shift_disp(crop_left(sample.disp0r, shift), shift)
+        )
+        
+    else: # decrease disparity
+        return Sample(
+            left=crop_left(sample.left, -shift),
+            right=crop_right(sample.right, -shift),
+            displ=shift_disp(crop_left(sample.displ, -shift), shift),
+            dispr=shift_disp(crop_right(sample.dispr, -shift), shift),
+            disp0l=shift_disp(crop_left(sample.disp0l, -shift), shift),
+            disp0r=shift_disp(crop_right(sample.disp0r, -shift), shift)
+        )
+    
+
+def shift_aug(sample, prob, max_abs_shift):
+    c = choose([1 - prob, prob])
+    if c == 0:
+        return sample
+    else:
+        min_disp = np.nanmin(np.asarray(sample.disp0l))
+        min_shift = max(-min_disp + 3, -max_abs_shift)
+        max_shift = max_abs_shift
+
+        shift = random.randint(min_shift, max_shift)
+        print(f'shift {sample.name} by {shift}')
+
+        return shift_sample(sample, shift)
+# disparity shift end
+
+
 pipeline = [
     aug(lambda s: hor_flip_aug(s, 0.5)),
     aug(lambda s: vert_flip_aug(s, 0.5))
