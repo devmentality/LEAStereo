@@ -45,6 +45,8 @@ def read_sample(dir, sample_name):
 
 def store_sample(dir, sample):
     sample_name = sample.name + f"_{random.randint(1, 1000)}"
+    os.mkdir(os.path.join(dir, sample_name))
+
     left_name = os.path.join(dir, sample_name, 'img_L.tif')
     right_name = os.path.join(dir, sample_name, 'img_R.tif')
     displ_name = os.path.join(dir, sample_name, 'disp_L_lidar.tif')
@@ -148,8 +150,9 @@ if __name__ == "__main__":
         for line in list_file:
             sample_names.append(line.rstrip())
     
-    result = run(read_samples(args.in_dir, sample_names))
+    result = run(read_samples(args.in_dir, sample_names), pipeline)
 
+    os.mkdir(args.out_dir)
     for sample in result:
         print('Storing sample')
         store_sample(args.out_dir, sample)
