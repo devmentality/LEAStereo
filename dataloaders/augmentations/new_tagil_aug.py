@@ -444,9 +444,9 @@ pipeline = [
     aug(lambda s: hor_flip_aug(s, 0.5)),
     aug(lambda s: warp_aug(s, 0.5, 0.3)),
     aug(lambda s: shift_aug(s, 0.5, 32)),
+    aug(lambda s: scale_aug(s, 0.3, 0.2)),
+    lambda ss: crop_aug(ss, (700, 450), 5),
     aug(lambda s: vert_flip_aug(s, 0.5)),
-    aug(lambda s: scale_aug(s, 0.3, 0.3)),
-    lambda ss: crop_aug(ss, (700, 500), 5)
 ]
 
 
