@@ -308,7 +308,7 @@ def warp_aug(sample, warp_prob, max_scale_diff):
     elif c == 1: # warp right from left
         scale = 1 + (2 * random.random() - 1) * max_scale_diff
         print(f'warp {sample.name} with scale {scale}')
-        return warp_right_from_left(sample.left, sample.displ, scale) 
+        return warp_right_from_left(sample, scale) 
 # warping end
 
 
