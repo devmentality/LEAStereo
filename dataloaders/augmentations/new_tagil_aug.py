@@ -299,6 +299,69 @@ def warp_right_from_left(sample: Sample, scale: float): # -> sample
         disp0l=Image.fromarray(scaled_disp0l),
         disp0r=Image.fromarray(np.full((orig_h, orig_w), np.nan)) # we lose right disparity here
     )
+
+
+def smooth_disp(disp_np):
+    disp_np_zeroed = disp_np.copy()
+    disp_np_zeroed[np.isnan(disp_np_zeroed)] = 0
+    disp_np_zeroed = cv2.medianBlur(cv2.medianBlur(disp_np_zeroed, 5), 3)
+
+    sizes = [5,15,31,51]
+    blurred = disp_np_zeroed.copy()
+    
+    for s in sizes:
+        blurred = cv2.blur(blurred, (s,s))
+      
+    mask = (disp_np_zeroed == 0)
+    disp_np_zeroed[mask] = blurred[mask]
+    return disp_np_zeroed
+
+
+def warp_right(right, dispr, scale): # scale > 0 => left; scale < 0 => right
+    W = right.size[0]
+    H = right.size[1]
+
+    scale_abs = abs(scale)
+    
+    if scale < 0:
+        dispr = hflip(dispr)
+        right = hflip(right)
+
+    prep_disp = smooth_disp(np.asarray(dispr))
+    prep_disp = (scale_abs * prep_disp).round()
+
+    prep_right = prepare_image(right, W)
+
+    projectedr = project_image(prep_right, prep_disp, None, H, W)
+    
+    if scale < 0:
+        projectedr_result = hflip(Image.fromarray(projectedr[:, :, 0]))
+    else:
+        projectedr_result = Image.fromarray(projectedr[:, :, 0])
+        
+    #return projectedr_result
+
+    smooth_result = Image.fromarray(cv2.medianBlur(np.asarray(projectedr_result), 3))
+    return smooth_result
+
+
+def warp_right_from_right(sample: Sample, scale: float):
+    orig_w, orig_h = sample.left.size
+
+    projected_right = warp_right(sample.right, sample.disp0r, scale - 1)
+        
+    scaled_displ = (scale * np.array(sample.displ)).round()    
+    scaled_disp0l = (scale * np.array(sample.disp0l)).round()
+    
+    return Sample(
+        name=sample.name,
+        left=sample.left,
+        right=projected_right,
+        displ=Image.fromarray(scaled_displ),
+        dispr=Image.fromarray(np.full((orig_h, orig_w), np.nan)), # we lose right disparity here
+        disp0l=Image.fromarray(scaled_disp0l),
+        disp0r=Image.fromarray(np.full((orig_h, orig_w), np.nan)) # we lose right disparity here
+    )
     
 
 def warp_aug(sample, warp_prob, max_scale_diff):
@@ -308,7 +371,8 @@ def warp_aug(sample, warp_prob, max_scale_diff):
     elif c == 1: # warp right from left
         scale = 1 + (2 * random.random() - 1) * max_scale_diff
         print(f'warp {sample.name} with scale {scale}')
-        return warp_right_from_left(sample, scale) 
+        # return warp_right_from_left(sample, scale) 
+        return warp_right_from_right(sample, scale)
 # warping end
 
 
