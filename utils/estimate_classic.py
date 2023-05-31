@@ -41,7 +41,7 @@ def main():
             f'-z_shift={Z_SHIFT}'
         ]
 
-        result = subprocess.run(args.program + params, stdout=subprocess.PIPE)
+        result = subprocess.run([args.program] + params, stdout=subprocess.PIPE)
         vis, d_err, o_err, t_err, mean_err = map(float, result.stdout.decode('utf-8').split())
 
         print(f'{sample[0]}_{sample[1]}: {d_err} {o_err} {t_err} {mean_err}')
