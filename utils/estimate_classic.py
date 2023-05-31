@@ -26,6 +26,7 @@ def main():
     sum_d_err = 0
     sum_t_err = 0
     sum_mean_err = 0
+    n_samples = 0
     for sample in sample_dirs:
         gt_path = os.path.join(args.in_dir, sample[0], sample[1], 'epi', 'disp_L_lidar.tif')
         pred_path = os.path.join(args.in_dir, sample[0], sample[1], 'epi', f'disp_L_{args.algo}.tif')
@@ -47,16 +48,20 @@ def main():
         str_res = result.stdout.decode('utf-8')
         print(f'{sample[0]}_{sample[1]}: {str_res}')
 
+        if str_res.startswith('warning'):
+            continue
+
         vis, d_err, o_err, t_err, mean_err = map(float, str_res.split())
 
         print(f'{sample[0]}_{sample[1]}: {d_err} {o_err} {t_err} {mean_err}')
         sum_d_err += d_err
         sum_t_err += t_err
         sum_mean_err += mean_err
+        n_samples += 1
 
-    avg_d_err = sum_d_err / len(sample_dirs)
-    avg_t_err = sum_t_err / len(sample_dirs)
-    avg_mean_err = sum_mean_err / len(sample_dirs)
+    avg_d_err = sum_d_err / n_samples
+    avg_t_err = sum_t_err / n_samples
+    avg_mean_err = sum_mean_err / n_samples
 
     print(f'avg d_err: {avg_d_err}; avg t_err: {avg_t_err}; avg mean_err: {avg_mean_err}')
 
