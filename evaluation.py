@@ -165,6 +165,8 @@ def predict(left, right):
 
     temp = prediction.cpu()
     temp = temp.detach().numpy()
+    temp = temp.round() + opt.z_shift
+
     if height <= opt.crop_height or width <= opt.crop_width:
         return temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
     else:
