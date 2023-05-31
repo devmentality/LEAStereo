@@ -7,10 +7,12 @@ parser.add_argument("--in_dir", type=str, help="dataset dir")
 parser.add_argument('--program', type=str, default='/home6/m_imm/cmm', help="midd eval program path")
 parser.add_argument('--list', type=str, help='path to list')
 parser.add_argument('--algo', type=str, help='algo name')
+parser.add_argument('--z_shift', type=int, default=0, help='disp shift')
+
 
 X_SIZE = 576
 Y_SIZE = 384
-Z_SHIFT=0
+
 
 def main():
     args = parser.parse_args()
@@ -38,7 +40,7 @@ def main():
             f'-y_size={Y_SIZE}',
             '-x_shift=0',
             '-y_shift=0',
-            f'-z_shift={Z_SHIFT}'
+            f'-z_shift={args.z_shift}'
         ]
 
         result = subprocess.run([args.program] + params, stdout=subprocess.PIPE)
