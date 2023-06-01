@@ -274,6 +274,7 @@ def main():
             rightsave = Image.open(rightname)
             rightsave = crop_image_grayscale(rightsave, opt.crop_height, opt.crop_width)
             rightsave = scale_for_render(rightsave, 30, 200)
+            skimage.io.imsave(r_savename, rightsave)
 
         else:
             raise Exception("Unsupported dataset")
