@@ -259,15 +259,22 @@ def main():
 
             savename = opt.save_path + current_file + '.png'
 
-            leftname = os.path.join(file_path, current_file, 'left.tiff')
             in_savename = opt.save_path + current_file + '_in_render.png'
             error_savename = opt.save_path + current_file + '_error.png'
 
+            l_savename = opt.save_path + current_file + '_L_render.png'   
+            leftname = os.path.join(file_path, current_file, 'left.tiff') 
             leftsave = Image.open(leftname)
             leftsave = crop_image_grayscale(leftsave, opt.crop_height, opt.crop_width)
             leftsave = scale_for_render(leftsave, 30, 200)
+            skimage.io.imsave(l_savename, leftsave)
 
-            skimage.io.imsave(in_savename, leftsave)
+            r_savename = opt.save_path + current_file + '_R_render.png'    
+            rightname = os.path.join(file_path, current_file, 'right.tiff')
+            rightsave = Image.open(rightname)
+            rightsave = crop_image_grayscale(rightsave, opt.crop_height, opt.crop_width)
+            rightsave = scale_for_render(rightsave, 30, 200)
+
         else:
             raise Exception("Unsupported dataset")
 
