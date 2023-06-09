@@ -265,10 +265,10 @@ def val_other(epoch):
     if opt.val34:
         val_for(epoch, *val_params[1])
     if opt.val56:
-        val_for(epoch, *val_params[2])
+        val_for(epoch, *val_params[2], 3)
 
 
-def val_for(epoch, dataset_name, list_path, data_path):
+def val_for(epoch, dataset_name, list_path, data_path, z_shift=0):
     f = open(list_path, 'r')
     filelist = f.readlines()
 
@@ -283,7 +283,7 @@ def val_for(epoch, dataset_name, list_path, data_path):
         right = data[3: 6, :, :]
         disp = data[6, :, :]
 
-        prediction = predict(left, right)
+        prediction = predict(left, right, z_shift)
         disp = crop_array_grayscale(disp, opt.crop_height, opt.crop_width)
 
         mask = np.logical_and(disp >= 0.001, disp <= opt.maxdisp)
@@ -307,7 +307,7 @@ def val_for(epoch, dataset_name, list_path, data_path):
     print(f"===> {dataset_name} Total {len(filelist)} Frames ==> AVG EPE Error: {avg_error:.4f}, AVG 3px Error: {avg_three_px_error:.4f}")
 
 
-def predict(left, right):
+def predict(left, right, z_shift):
     _, height, width = np.shape(left)
     input1 = np.ones([1, 3, opt.crop_height, opt.crop_width], 'float32')
     input1[0, :, :, :] = crop_array(left, opt.crop_height, opt.crop_width)
@@ -328,6 +328,8 @@ def predict(left, right):
 
     temp = prediction.cpu()
     temp = temp.detach().numpy()
+    temp = temp.round() + z_shift
+
     if height <= opt.crop_height or width <= opt.crop_width:
         return temp[0, opt.crop_height - height: opt.crop_height, opt.crop_width - width: opt.crop_width]
     else:
