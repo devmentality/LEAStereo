@@ -9,6 +9,7 @@ import re
 import torch
 import torch.nn.parallel
 import numpy as np
+import dataloaders.datasets.whu as whu
 from PIL import Image
 from struct import unpack
 from torch.autograd import Variable
@@ -262,17 +263,20 @@ def main():
             in_savename = opt.save_path + current_file + '_in_render.png'
             error_savename = opt.save_path + current_file + '_error.png'
 
-            l_savename = opt.save_path + current_file + '_L_render.png'   
             leftname = os.path.join(file_path, current_file, 'left.tiff') 
-            leftsave = Image.open(leftname)
-            leftsave = crop_image_grayscale(leftsave, opt.crop_height, opt.crop_width)
+            rightname = os.path.join(file_path, current_file, 'right.tiff')
+
+            leftname, rightname = rightname, leftname
+
+            l_savename = opt.save_path + current_file + '_L_render.png'   
+            leftsave = whu.read_left_image(leftname)
+            leftsave = crop_array_grayscale(leftsave, opt.crop_height, opt.crop_width)
             leftsave = scale_for_render(leftsave, 30, 200)
             skimage.io.imsave(l_savename, leftsave)
 
             r_savename = opt.save_path + current_file + '_R_render.png'    
-            rightname = os.path.join(file_path, current_file, 'right.tiff')
-            rightsave = Image.open(rightname)
-            rightsave = crop_image_grayscale(rightsave, opt.crop_height, opt.crop_width)
+            rightsave = whu.read_right_image(rightname)
+            rightsave = crop_array_grayscale(rightsave, opt.crop_height, opt.crop_width)
             rightsave = scale_for_render(rightsave, 30, 200)
             skimage.io.imsave(r_savename, rightsave)
 
