@@ -183,6 +183,7 @@ def main():
     three_px_error_all = 0
     bad_2_all = 0
     bad_1_all = 0
+    bad_3_all = 0
 
     for index in range(len(filelist)):
         current_file = filelist[index][:-1]
@@ -302,11 +303,14 @@ def main():
         bad_1 = calculate_bad_pixel_frac(predicted_disparity, true_disparity, opt.maxdisp, 1)
         bad_1_all += bad_1
 
+        bad_3 = calculate_bad_pixel_frac(predicted_disparity, true_disparity, opt.maxdisp, 3)
+        bad_3_all += bad_3
+
         with open(opt.save_path + f'{current_file}_metrics.txt', 'w') as metrics_file:
             metrics_file.write('EPE\tD1\tBad2\tBad1\n')
-            metrics_file.write(f'{error}\t{three_px_error}\t{bad_2}\t{bad_1}\n')
+            metrics_file.write(f'{error}\t{three_px_error}\t{bad_2}\t{bad_1}\t{bad_3}\n')
 
-        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}, bad 2.0: {bad_2:.3f}, bad 1.0: {bad_1:.3f}")
+        print(f"===> Frame {index}, {current_file}: EPE Error: {error}, 3px Error: {three_px_error:.3f}, bad 2.0: {bad_2:.3f}, bad 1.0: {bad_1:.3f}, bad 3.0: {bad_3:.3f}")
 
         skimage.io.imsave(savename, prediction.astype(np.uint8))
         skimage.io.imsave(opt.save_path + current_file + '.tif', prediction)
@@ -323,9 +327,10 @@ def main():
     avg_three_px_error = three_px_error_all / len(filelist)
     avg_bad_2 = bad_2_all / len(filelist)
     avg_bad_1 = bad_1_all / len(filelist)
+    avg_bad_3 = bad_3_all / len(filelist)
 
-    print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG 3px Error: {:.4f}, AVG Bad 2.0: {:.4f}, AVG Bad 1.0: {:.4f}".format(
-        len(filelist), avg_error, avg_three_px_error, avg_bad_2, avg_bad_1))
+    print("===> Total {} Frames ==> AVG EPE Error: {:.4f}, AVG 3px Error: {:.4f}, AVG Bad 2.0: {:.4f}, AVG Bad 1.0: {:.4f}, AVG Bad 3.0: {:.4f}".format(
+        len(filelist), avg_error, avg_three_px_error, avg_bad_2, avg_bad_1, avg_bad_3))
 
 
 if __name__ == "__main__":
